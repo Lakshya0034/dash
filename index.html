@@ -6,10 +6,15 @@
     <title>StudyHub Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         /* Custom styles for dark mode */
         body {
             min-height: 100vh;
+        }
+        #combinedTaskList.hide-completed .completed-task {
+            display: none;
         }
     </style>
 </head>
@@ -52,7 +57,12 @@
 
             <!-- Combined Tasks Widget (Left, spans 2 columns) -->
             <div class="bg-gray-800 rounded-lg shadow-md p-6 md:col-span-2">
-                <h2 class="text-xl font-bold mb-4 text-white">Tasks</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white">Tasks</h2>
+                    <button id="toggleCompletedBtn" class="hidden rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
+                        Show Completed
+                    </button>
+                </div>
                 <div class="space-y-4" id="homeworkWidget">
                     <div>
                         <div class="flex gap-2 mb-3">
@@ -130,7 +140,12 @@
 
             <!-- Friends' Activity Widget -->
             <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Friends' Activity</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white">Friends' Activity</h2>
+                    <button id="toggleFriendsCompletedBtn" class="hidden rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
+                        Show Completed
+                    </button>
+                </div>
                 <div id="friendsActivity" class="space-y-3 max-h-96 overflow-y-auto">
                     <p class="text-sm text-gray-400">No activity to show. Add friends to see their progress!</p>
                 </div>
@@ -160,7 +175,7 @@
             <div class="bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4 text-white">Google Calendar</h2>
                 <div class="aspect-video bg-gray-700 rounded overflow-hidden">
-                    <iframe id="calendarFrame" src="" class="w-full h-full border-0" allow="calendar"></iframe>
+                    <iframe id="calendarFrame" src="" class="w-full h-full border-0"></iframe>
                     <p class="text-sm text-gray-400 p-4 text-center">Add your public calendar embed URL</p>
                 </div>
             </div>
@@ -369,6 +384,37 @@
         </div>
     </div>
 
+    <!-- Tag Edit Modal -->
+    <div id="tagEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900/95 shadow-2xl">
+            <div class="flex items-start justify-between border-b border-gray-800 px-6 py-4">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Edit Tag</h3>
+                </div>
+                <button id="tagEditCloseBtn" class="rounded-full border border-gray-700 bg-gray-800/70 p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M6 6l12 12M6 18L18 6" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4 p-6">
+                <input type="text" id="tagEditName" placeholder="Tag name" class="w-full rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="tagEditColor" class="w-full rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="blue">Blue</option>
+                    <option value="green">Green</option>
+                    <option value="red">Red</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="purple">Purple</option>
+                    <option value="teal">Teal</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-end gap-2 border-t border-gray-800 bg-gray-900/80 px-6 py-4">
+                <button id="tagEditCancelBtn" class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">Cancel</button>
+                <button id="tagEditSaveBtn" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Homework Exercise Modal -->
     <div id="exerciseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
@@ -402,7 +448,7 @@
         // Import Firebase modules from CDN
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc, serverTimestamp, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc, serverTimestamp, arrayUnion, arrayRemove, orderBy, limit, writeBatch, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 
         // ============================================
         // FIREBASE CONFIGURATION
@@ -451,6 +497,7 @@
 
         // Friends' Activity elements
         const friendsActivity = document.getElementById('friendsActivity');
+        const toggleFriendsCompletedBtn = document.getElementById('toggleFriendsCompletedBtn');
         const combinedTaskList = document.getElementById('combinedTaskList');
 
         // Side panel elements
@@ -503,6 +550,17 @@
         const plannerSaveBtn = document.getElementById('plannerSaveBtn');
         const plannerCancelBtn = document.getElementById('plannerCancelBtn');
         const plannerCloseBtn = document.getElementById('plannerCloseBtn');
+
+        // Task list controls
+        const toggleCompletedBtn = document.getElementById('toggleCompletedBtn');
+
+        // Tag edit modal elements
+        const tagEditModal = document.getElementById('tagEditModal');
+        const tagEditName = document.getElementById('tagEditName');
+        const tagEditColor = document.getElementById('tagEditColor');
+        const tagEditSaveBtn = document.getElementById('tagEditSaveBtn');
+        const tagEditCancelBtn = document.getElementById('tagEditCancelBtn');
+        const tagEditCloseBtn = document.getElementById('tagEditCloseBtn');
 
         // Calendar integration
         let googleAccessToken = null;
@@ -741,12 +799,14 @@
         let userTags = [];
 
         function renderTagChip(tag, withRemove = false) {
+            // Added an edit button
             const style = colorBadgeStyles[tag.color] || colorBadgeStyles.default;
             return `
-                <span class="inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-semibold border" style="background-color:${style.bg}; border-color:${style.border}; color:${style.text}">
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border" style="background-color:${style.bg}; border-color:${style.border}; color:${style.text}">
                     <span class="w-2 h-2 rounded-full" style="background-color:${style.dot};"></span>
-                    ${tag.name}
-                    ${withRemove ? `<button class="ml-1 rounded bg-transparent hover:text-red-300" data-remove-tag="${tag.id}" title="Remove">×</button>` : ''}
+                    <span class="mx-1">${tag.name}</span>
+                    ${withRemove ? `<button class="rounded bg-transparent hover:text-blue-300" data-edit-tag="${tag.id}" title="Edit">✎</button>` : ''}
+                    ${withRemove ? `<button class="rounded bg-transparent hover:text-red-300" data-remove-tag="${tag.id}" title="Remove">×</button>` : ''}
                 </span>
             `;
         }
@@ -820,6 +880,11 @@
         if (tagList) {
             tagList.addEventListener('click', async (e) => {
                 const btn = e.target.closest('[data-remove-tag]');
+                const editBtn = e.target.closest('[data-edit-tag]');
+                if (editBtn) {
+                    openTagEditModal(editBtn.dataset.editTag);
+                    return;
+                }
                 if (!btn) return;
                 const id = btn.getAttribute('data-remove-tag');
                 userTags = userTags.filter(t => t.id !== id);
@@ -834,6 +899,81 @@
                 }
             });
         }
+
+        // ============================================
+        // TAG EDIT MODAL
+        // ============================================
+        let currentEditingTagId = null;
+
+        function openTagEditModal(tagId) {
+            currentEditingTagId = tagId;
+            const tag = userTags.find(t => t.id === tagId);
+            if (!tag || !tagEditModal) return;
+
+            tagEditName.value = tag.name;
+            tagEditColor.value = tag.color;
+
+            tagEditModal.classList.remove('hidden');
+            tagEditModal.classList.add('flex');
+            lockScroll();
+        }
+
+        function closeTagEditModal() {
+            if (!tagEditModal) return;
+            tagEditModal.classList.add('hidden');
+            tagEditModal.classList.remove('flex');
+            currentEditingTagId = null;
+            unlockScroll();
+        }
+
+        if (tagEditSaveBtn) {
+            tagEditSaveBtn.addEventListener('click', async () => {
+                if (!currentEditingTagId || !currentUser) return;
+
+                const newName = tagEditName.value.trim();
+                const newColor = tagEditColor.value;
+                if (!newName) return;
+
+                const tagIndex = userTags.findIndex(t => t.id === currentEditingTagId);
+                if (tagIndex === -1) return;
+
+                const oldTag = { ...userTags[tagIndex] };
+                const newTag = { id: currentEditingTagId, name: newName, color: newColor };
+                userTags[tagIndex] = newTag;
+
+                // Save the updated tags array to the user's document
+                await saveUserTags(userTags);
+
+                // Now, find and update all tasks that use this tag
+                const tasksQuery = query(collection(db, 'tasks'), where('userId', '==', currentUser.uid));
+                const querySnapshot = await getDocs(tasksQuery);
+                const batch = writeBatch(db);
+
+                querySnapshot.forEach(docSnap => {
+                    const task = { id: docSnap.id, ...docSnap.data() };
+                    const taskTags = task.tags || [];
+                    const tagToUpdateIndex = taskTags.findIndex(t => t.id === currentEditingTagId);
+
+                    if (tagToUpdateIndex > -1) {
+                        const updatedTaskTags = [...taskTags];
+                        updatedTaskTags[tagToUpdateIndex] = newTag;
+                        const taskRef = doc(db, 'tasks', task.id);
+                        batch.update(taskRef, { tags: updatedTaskTags });
+                    }
+                });
+
+                await batch.commit();
+
+                // Re-render UI
+                renderTagList();
+                renderTagsPicker(homeworkTagsPicker, 'homework');
+                showToast('Tag updated successfully!');
+                closeTagEditModal();
+            });
+        }
+
+        [tagEditCancelBtn, tagEditCloseBtn].forEach(btn => btn?.addEventListener('click', closeTagEditModal));
+
         if (homeworkPlannerBtn) {
             homeworkPlannerBtn.addEventListener('click', () => {
                 openTaskPlanner({ mode: 'create', type: 'homework' });
@@ -1244,7 +1384,7 @@
         // AUTHENTICATION
         // ============================================
         let currentUser = null;
-        let currentTaskId = null; // For exercise modal
+        let currentTaskId = null; // For exercise modal and other task-specific actions
 
         // Monitor authentication state
         onAuthStateChanged(auth, async (user) => {
@@ -1443,11 +1583,16 @@
         // ============================================
         // TASKS (Combined)
         // ============================================
+        let showCompletedTasks = false;
+
         function renderCombinedTask(task, container) {
             const taskDiv = document.createElement('div');
-            taskDiv.className = 'bg-gray-700 rounded p-3';
-            
+            const isActive = task.isActive || false;
             const isCompleted = task.completed || false;
+
+            taskDiv.className = `bg-gray-700 rounded-lg p-3 border-2 transition-colors ${isActive ? 'border-green-500' : 'border-transparent'} ${isCompleted ? 'completed-task opacity-60 hover:opacity-100' : ''}`;
+            taskDiv.dataset.id = task.id; // Add data-id for sortable
+            
             const formattedDueDate = formatDueDate(task.dueDate);
             const metadataPieces = [];
             const colorBadge = getColorBadge(task.color);
@@ -1467,36 +1612,47 @@
             taskDiv.innerHTML = `
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
                     <div class="flex flex-1 items-start gap-3">
-                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                               class="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-500 bg-gray-600 text-green-500 focus:ring-green-500"
-                               data-task-id="${task.id}">
+                        <button class="flex-shrink-0 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700" data-complete-task="${task.id}" title="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}">
+                            ${isCompleted 
+                                ? `<svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>`
+                                : `<svg class="h-5 w-5 text-gray-500 hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                            }
+                        </button>
                         <div class="flex-1">
                             <span class="${isCompleted ? 'line-through text-gray-400' : 'text-white'} font-medium">${task.title}</span>
                             ${metadataPieces.length || tagsBadges ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}${tagsBadges ? (metadataPieces.length ? '' : '') + tagsBadges : ''}</div>` : ''}
                             ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/50 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
                         </div>
                     </div>
-                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
-                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-task-generic="${task.id}">
-                            Edit
+                    <div class="flex shrink-0 items-start gap-1">
+                        <button class="rounded-lg p-2 text-gray-400 hover:bg-gray-600/50 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500" title="Set as active task" data-set-active="${task.id}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                         </button>
-                        <button class="rounded-lg border border-emerald-500/40 bg-emerald-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 hover:bg-emerald-600/30 focus:outline-none focus:ring-2 focus:ring-emerald-500" data-add-to-calendar="${task.id}">
-                            Add to Calendar
+                        <button class="rounded-lg p-2 text-gray-400 hover:bg-gray-600/50 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Edit task" data-edit-task-generic="${task.id}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path></svg>
                         </button>
-                        <button class="rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-purple-200 hover:bg-purple-600/30 focus:outline-none focus:ring-2 focus:ring-purple-500" data-task-id="${task.id}" data-add-exercise>
-                            ${task.exercises && task.exercises.length ? 'Edit Exercises' : 'Add Exercises'}
+                        <button class="rounded-lg p-2 text-gray-400 hover:bg-gray-600/50 hover:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" title="Add to Google Calendar" data-add-to-calendar="${task.id}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </button>
+                        <button class="rounded-lg p-2 text-gray-400 hover:bg-gray-600/50 hover:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500" title="${task.exercises && task.exercises.length ? 'Edit Exercises' : 'Add Exercises'}" data-task-id="${task.id}" data-add-exercise>
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </button>
+                        <button class="rounded-lg p-2 text-gray-400 hover:bg-gray-600/50 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500" title="Delete task" data-delete-task="${task.id}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
                 </div>
             `;
 
-            const checkbox = taskDiv.querySelector('input[type="checkbox"]');
-            checkbox.addEventListener('change', async (e) => {
-                const taskRef = doc(db, 'tasks', task.id);
-                await updateDoc(taskRef, {
-                    completed: e.target.checked
+            const completeBtn = taskDiv.querySelector('[data-complete-task]');
+            if (completeBtn) {
+                completeBtn.addEventListener('click', async () => {
+                    const taskRef = doc(db, 'tasks', task.id);
+                    await updateDoc(taskRef, {
+                        completed: !isCompleted
+                    });
                 });
-            });
+            }
 
             const editGenericBtn = taskDiv.querySelector('[data-edit-task-generic]');
             if (editGenericBtn) {
@@ -1507,6 +1663,41 @@
                         taskId: task.id,
                         taskData: task
                     });
+                });
+            }
+
+            const setActiveBtn = taskDiv.querySelector('[data-set-active]');
+            if (setActiveBtn) {
+                setActiveBtn.addEventListener('click', async () => {
+                    const newActiveId = task.id;
+                    const batch = writeBatch(db);
+
+                    // Find and deactivate the current active task
+                    const q = query(collection(db, 'tasks'), where('userId', '==', currentUser.uid), where('isActive', '==', true));
+                    const activeSnapshot = await getDocs(q);
+                    activeSnapshot.forEach(docSnap => {
+                        if (docSnap.id !== newActiveId) {
+                            batch.update(doc(db, 'tasks', docSnap.id), { isActive: false });
+                        }
+                    });
+
+                    // Toggle the new active task
+                    const taskRef = doc(db, 'tasks', newActiveId);
+                    batch.update(taskRef, { isActive: !isActive });
+
+                    await batch.commit();
+                    showToast(isActive ? 'Task unmarked as active.' : 'Task set as active!', 'info');
+                });
+            }
+
+            const deleteTaskBtn = taskDiv.querySelector('[data-delete-task]');
+            if (deleteTaskBtn) {
+                deleteTaskBtn.addEventListener('click', async () => {
+                    if (confirm(`Are you sure you want to delete this task?\n\n"${task.title}"`)) {
+                        const taskRef = doc(db, 'tasks', task.id);
+                        await deleteDoc(taskRef);
+                        showToast('Task deleted.', 'info');
+                    }
                 });
             }
 
@@ -1535,7 +1726,8 @@
 
             const q = query(
                 collection(db, 'tasks'),
-                where('userId', '==', currentUser.uid)
+                where('userId', '==', currentUser.uid),
+                orderBy('order', 'asc') // Order by the new 'order' field
             );
 
             onSnapshot(q, (snapshot) => {
@@ -1546,21 +1738,62 @@
                 snapshot.forEach((docSnap) => {
                     items.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                
+                const hasCompleted = items.some(t => t.completed);
+                toggleCompletedBtn.classList.toggle('hidden', !hasCompleted);
 
-                // Sort by createdAt desc
-                items.sort((a, b) => {
-                    const aTime = a.createdAt?.toMillis?.() || 0;
-                    const bTime = b.createdAt?.toMillis?.() || 0;
-                    return bTime - aTime;
-                });
+                const visibleItems = items; // All items are fetched, visibility is handled by CSS
 
-                items.forEach((task) => renderCombinedTask(task, combinedTaskList));
+                visibleItems.forEach((task) => renderCombinedTask(task, combinedTaskList));
 
-                if (items.length === 0) {
+                if (visibleItems.length === 0) {
                     combinedTaskList.innerHTML = '<p class="text-sm text-gray-400">No tasks yet.</p>';
+                } else {
+                    // Destroy previous instance if it exists to avoid memory leaks
+                    if (Sortable.get(combinedTaskList)) Sortable.get(combinedTaskList).destroy();
+
+                    // Initialize SortableJS after tasks are rendered
+                    new Sortable(combinedTaskList, {
+                        animation: 150,
+                        ghostClass: 'bg-gray-600',
+                        onEnd: async (evt) => {
+                            const taskIds = Array.from(evt.target.children).map(child => child.dataset.id);
+                            
+                            // Create a batch write to update the 'order' of all tasks
+                            const batch = writeBatch(db);
+                            taskIds.forEach((id, index) => {
+                                if (id) {
+                                    const taskRef = doc(db, 'tasks', id);
+                                    batch.update(taskRef, { order: index });
+                                }
+                            });
+
+                            try {
+                                await batch.commit();
+                                showToast('Task order saved!', 'info');
+                            } catch (error) {
+                                console.error("Error reordering tasks: ", error);
+                                showToast('Could not save new task order.', 'error');
+                                // Note: The UI will be out of sync with the DB here.
+                                // A full reload of tasks might be needed to correct it.
+                                loadAllTasks();
+                            }
+                        }
+                    });
                 }
             });
         }
+
+        if (toggleCompletedBtn) {
+            toggleCompletedBtn.addEventListener('click', () => {
+                showCompletedTasks = !showCompletedTasks;
+                combinedTaskList.classList.toggle('hide-completed', !showCompletedTasks);
+                toggleCompletedBtn.textContent = showCompletedTasks ? 'Hide Completed' : 'Show Completed';
+            });
+        }
+        // Initial state
+        combinedTaskList.classList.add('hide-completed');
+
 
         // Add homework task
         addHomeworkBtn.addEventListener('click', async () => {
@@ -1569,12 +1802,18 @@
 
             const settings = taskComposerState.homework;
 
+            // Get the current highest order value to place the new task at the top
+            const tasksQuery = query(collection(db, 'tasks'), where('userId', '==', currentUser.uid), orderBy('order', 'asc'), limit(1));
+            const querySnapshot = await getDocs(tasksQuery);
+            const highestOrder = querySnapshot.empty ? 0 : (querySnapshot.docs[0].data().order || 0);
+
             try {
                 await addDoc(collection(db, 'tasks'), {
                     title: title,
                     type: 'homework', // This is now the only type
                     completed: false,
-                    userId: currentUser.uid,
+                    userId: currentUser.uid,                    order: highestOrder - 1, // Add to the top of the list
+                    isActive: false,
                     createdAt: serverTimestamp(),
                     exercises: [],
                     dueDate: settings.dueDate || null,
@@ -1602,8 +1841,10 @@
         });
 
         // ============================================
-        // FRIENDS
+        // FRIENDS & ACTIVITY
         // ============================================
+        let showCompletedFriendsTasks = false;
+
         function loadFriends() {
             if (!currentUser) return;
 
@@ -1696,9 +1937,50 @@
             }
         }
 
-        // ============================================
-        // FRIENDS' ACTIVITY
-        // ============================================
+        function renderFriendActivityTask(item, container) {
+            const taskDiv = document.createElement('div');
+            const isActive = item.isActive || false;
+            const isCompleted = item.completed || false;
+
+            taskDiv.className = `bg-gray-700 rounded-lg p-3 border-2 transition-colors ${isActive ? 'border-green-500' : 'border-transparent'} ${isCompleted ? 'completed-task opacity-60' : ''}`;
+            
+            const formattedDueDate = formatDueDate(item.dueDate);
+            const metadataPieces = [];
+            const colorBadge = getColorBadge(item.color);
+            const priorityBadge = item.priority ? getPriorityBadge(item.priority) : '';
+            const tagsBadges = (item.tags || []).map(tag => renderTagChip(tag, false)).join('');
+            
+            if (formattedDueDate) {
+                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
+            }
+            if (colorBadge) {
+                metadataPieces.push(colorBadge);
+            }
+            if (priorityBadge) {
+                metadataPieces.push(priorityBadge);
+            }
+
+            taskDiv.innerHTML = `
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <img src="${item.friendPhotoURL || ''}" alt="${item.friendName}" class="h-6 w-6 rounded-full border border-gray-600 object-cover">
+                        <p class="text-sm font-semibold text-blue-300">${item.friendName}</p>
+                    </div>
+                    <div class="flex flex-1 items-start gap-3 pl-8">
+                        ${isCompleted 
+                            ? `<svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>`
+                            : `<svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                        }
+                        <div class="flex-1">
+                            <span class="${isCompleted ? 'line-through text-gray-400' : 'text-white'} font-medium">${item.title}</span>
+                            ${metadataPieces.length || tagsBadges ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}${tagsBadges ? (metadataPieces.length ? '' : '') + tagsBadges : ''}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(taskDiv);
+        }
+
         function loadFriendsActivity() {
             if (!currentUser) return;
 
@@ -1713,98 +1995,77 @@
                         return;
                     }
 
-                    // Query tasks from all friends
-                    // Note: Firestore 'in' queries are limited to 10 items
-                    // For more friends, we'd need to batch queries
-                    const friendChunks = [];
-                    for (let i = 0; i < friends.length; i += 10) {
-                        friendChunks.push(friends.slice(i, i + 10));
-                    }
-
                     friendsActivity.innerHTML = '';
+                    // Firestore 'in' queries are limited to 30 items in the array.
+                    // We chunk the friends list to handle this limitation.
+                    const friendChunks = [];
+                    const chunkSize = 30;
+                    for (let i = 0; i < friends.length; i += chunkSize) {
+                        friendChunks.push(friends.slice(i, i + chunkSize));
+                    }
 
                     for (const chunk of friendChunks) {
                         const q = query(
                             collection(db, 'tasks'),
-                            where('userId', 'in', chunk)
+                            where('userId', 'in', chunk),
+                            orderBy('createdAt', 'desc')
                         );
 
                         onSnapshot(q, async (snapshot) => {
-                            if (snapshot.empty && friendsActivity.innerHTML === '') {
-                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No tasks from friends yet.</p>';
-                                return;
-                            }
+                            // This listener will re-run for any change in this chunk.
+                            // We need to rebuild the list to reflect changes.
+                            friendsActivity.innerHTML = '';
 
-                            // Clear and rebuild activity list
-                            const existingItems = [];
+                            let allItems = [];
+                            let existingItems = [];
                             snapshot.forEach((docSnap) => {
                                 const task = { id: docSnap.id, ...docSnap.data() };
                                 existingItems.push(task);
                             });
 
-                            // Get friend names
+                            // Get friend names for the tasks in this chunk
                             const activityItems = await Promise.all(
                                 existingItems.map(async (task) => {
                                     try {
                                         const friendDoc = await getDoc(doc(db, 'users', task.userId));
                                         const friendData = friendDoc.exists() ? friendDoc.data() : null;
                                         return {
-                                            ...task,
-                                            friendName: friendData?.displayName || 'Unknown'
+                                            ...task,                                            friendName: friendData?.displayName || 'Unknown',
+                                            friendPhotoURL: friendData?.photoURL || ''
                                         };
                                     } catch (error) {
-                                        return { ...task, friendName: 'Unknown' };
+                                        return { ...task, friendName: 'Unknown', friendPhotoURL: '' };
                                     }
                                 })
                             );
 
-                            // Sort by creation time (newest first)
-                            activityItems.sort((a, b) => {
-                                const aTime = a.createdAt?.toMillis() || 0;
-                                const bTime = b.createdAt?.toMillis() || 0;
-                                return bTime - aTime;
-                            });
+                            allItems.push(...activityItems);
 
-                            friendsActivity.innerHTML = activityItems.map(item => {
-                                const statusText = item.completed ? 'completed' : 'is working on';
-                                const formattedDueDate = formatDueDate(item.dueDate);
-                                const metadataPieces = [];
-                                const colorBadge = getColorBadge(item.color);
-                                const priorityBadge = item.priority ? getPriorityBadge(item.priority) : '';
-                                const tagBadges = (item.tags || []).map(tag => renderTagChip(tag, false)).join('');
-                                metadataPieces.push(`<span>📚 Task</span>`);
-                                if (formattedDueDate) {
-                                    metadataPieces.push(`<span>Due ${formattedDueDate}</span>`);
-                                }
-                                if (colorBadge) {
-                                    metadataPieces.push(colorBadge);
-                                }
-                                if (priorityBadge) {
-                                    metadataPieces.push(priorityBadge);
-                                }
+                            // Sort all items by creation time
+                            allItems.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
-                                return `
-                                    <div class="bg-gray-700 rounded p-3 space-y-1">
-                                        <p class="text-white">
-                                            <span class="font-semibold text-blue-400">${item.friendName}</span>
-                                            ${statusText}
-                                            <span class="font-medium">${item.title}</span>
-                                        </p>
-                                        <div class="flex flex-wrap gap-2 text-xs text-gray-400">
-                                            ${metadataPieces.join('')}${tagBadges}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
+                            const hasCompleted = allItems.some(t => t.completed);
+                            toggleFriendsCompletedBtn.classList.toggle('hidden', !hasCompleted);
 
-                            if (friendsActivity.innerHTML === '') {
+                            if (allItems.length === 0) {
                                 friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No tasks from friends yet.</p>';
+                            } else {
+                                allItems.forEach(item => renderFriendActivityTask(item, friendsActivity));
                             }
                         });
                     }
                 }
             });
         }
+
+        if (toggleFriendsCompletedBtn) {
+            toggleFriendsCompletedBtn.addEventListener('click', () => {
+                showCompletedFriendsTasks = !showCompletedFriendsTasks;
+                friendsActivity.classList.toggle('hide-completed', !showCompletedFriendsTasks);
+                toggleFriendsCompletedBtn.textContent = showCompletedFriendsTasks ? 'Hide Completed' : 'Show Completed';
+            });
+        }
+        friendsActivity.classList.add('hide-completed');
 
         // ============================================
         // STUDY TIMER (POMODORO)
