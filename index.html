@@ -53,7 +53,7 @@
             <!-- Combined Tasks Widget (Left, spans 2 columns) -->
             <div class="bg-gray-800 rounded-lg shadow-md p-6 md:col-span-2">
                 <h2 class="text-xl font-bold mb-4 text-white">Tasks</h2>
-                <div class="space-y-4">
+                <div class="space-y-4" id="homeworkWidget">
                     <div>
                         <div class="flex gap-2 mb-3">
                             <button class="px-3 py-1 text-sm font-medium rounded transition task-tab bg-gray-700 text-white border border-gray-600" data-tab-group="homework" data-tab="quick">
@@ -391,6 +391,12 @@
         </div>
     </div>
 
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] w-full max-w-sm space-y-3">
+        <!-- Toast notifications will be dynamically added here -->
+    </div>
+
+
     <!-- Firebase SDKs -->
     <script type="module">
         // Import Firebase modules from CDN
@@ -438,16 +444,6 @@
         const homeworkClearSettingsBtn = document.getElementById('homeworkClearSettingsBtn');
         const homeworkQuickDueButtons = document.querySelectorAll('[data-quick-homework-due]');
 
-        // Revision elements
-        const revisionInput = document.getElementById('revisionInput');
-        const addRevisionBtn = document.getElementById('addRevisionBtn');
-        const revisionList = document.getElementById('revisionList');
-        const revisionAdvancedOptions = document.getElementById('revisionAdvancedOptions');
-        const revisionSettingsSummary = document.getElementById('revisionSettingsSummary');
-        const revisionPlannerBtn = document.getElementById('revisionPlannerBtn');
-        const revisionClearSettingsBtn = document.getElementById('revisionClearSettingsBtn');
-        const revisionQuickDueButtons = document.querySelectorAll('[data-quick-revision-due]');
-
         // Friends elements
         const friendInput = document.getElementById('friendInput');
         const addFriendBtn = document.getElementById('addFriendBtn');
@@ -478,7 +474,6 @@
         const tagList = document.getElementById('tagList');
         const tagListEmpty = document.getElementById('tagListEmpty');
         const homeworkTagsPicker = document.getElementById('homeworkTagsPicker');
-        const revisionTagsPicker = document.getElementById('revisionTagsPicker');
 
         // Timer elements
         const timerDisplay = document.getElementById('timerDisplay');
@@ -518,6 +513,43 @@
         // ============================================
         // UTILITIES
         // ============================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+
+            const icons = {
+                success: `<svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>`,
+                error: `<svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`,
+                info: `<svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>`
+            };
+
+            const colors = {
+                success: 'bg-green-600 border-green-700',
+                error: 'bg-red-600 border-red-700',
+                info: 'bg-blue-600 border-blue-700'
+            };
+
+            toast.className = `flex items-center gap-3 w-full rounded-lg border p-4 text-sm font-semibold text-white shadow-lg transition-all duration-300 transform translate-y-4 opacity-0 ${colors[type] || colors.info}`;
+            toast.innerHTML = `
+                ${icons[type] || icons.info}
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            // Animate out and remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 4000);
+        }
+
         function formatDueDate(value) {
             if (!value) return null;
 
@@ -640,17 +672,15 @@
 
         const taskComposerState = {
             homework: defaultTaskSettings(),
-            revision: defaultTaskSettings()
         };
 
         const settingsSummaries = {
             homework: homeworkSettingsSummary,
-            revision: revisionSettingsSummary
         };
 
         function updateTaskComposerSummary(type) {
             const settings = taskComposerState[type];
-            if (!settings || !settingsSummaries[type]) return;
+            if (!settings || !settingsSummaries[type]) return; // 'type' will always be 'homework' now
 
             const pieces = [];
             pieces.push(settings.dueDate ? `Due ${formatDueDate(settings.dueDate)}` : 'No due date');
@@ -692,12 +722,11 @@
         }
 
         updateTaskComposerSummary('homework');
-        updateTaskComposerSummary('revision');
 
         function bindQuickDueButtons(buttons, type) {
             buttons.forEach((button) => {
                 button.addEventListener('click', () => {
-                    const action = button.dataset.quickHomeworkDue || button.dataset.quickRevisionDue;
+                    const action = button.dataset.quickHomeworkDue;
                     if (!action) return;
                     applyQuickDueDate(type, action);
                 });
@@ -705,7 +734,6 @@
         }
 
         bindQuickDueButtons(homeworkQuickDueButtons, 'homework');
-        bindQuickDueButtons(revisionQuickDueButtons, 'revision');
 
         // ============================================
         // TAGS MANAGEMENT
@@ -778,11 +806,11 @@
                 const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
                 userTags.push({ id, name, color });
                 renderTagList();
-                renderTagsPicker(homeworkTagsPicker, 'homework');
-                renderTagsPicker(revisionTagsPicker, 'revision');
+                renderTagsPicker(homeworkTagsPicker, 'homework'); // Only one picker to update now
                 newTagName.value = '';
                 try {
                     await saveUserTags(userTags);
+                    showToast('Tag created successfully!');
                 } catch (e) {
                     console.error('Failed to save tag:', e);
                 }
@@ -796,12 +824,13 @@
                 const id = btn.getAttribute('data-remove-tag');
                 userTags = userTags.filter(t => t.id !== id);
                 renderTagList();
-                renderTagsPicker(homeworkTagsPicker, 'homework');
-                renderTagsPicker(revisionTagsPicker, 'revision');
+                renderTagsPicker(homeworkTagsPicker, 'homework'); // Only one picker to update now
                 try {
                     await saveUserTags(userTags);
+                    showToast('Tag removed.', 'info');
                 } catch (e2) {
                     console.error('Failed to remove tag:', e2);
+                    showToast('Failed to remove tag.', 'error');
                 }
             });
         }
@@ -811,18 +840,8 @@
             });
         }
 
-        if (revisionPlannerBtn) {
-            revisionPlannerBtn.addEventListener('click', () => {
-                openTaskPlanner({ mode: 'create', type: 'revision' });
-            });
-        }
-
         if (homeworkClearSettingsBtn) {
             homeworkClearSettingsBtn.addEventListener('click', () => resetTaskComposerSettings('homework'));
-        }
-
-        if (revisionClearSettingsBtn) {
-            revisionClearSettingsBtn.addEventListener('click', () => resetTaskComposerSettings('revision'));
         }
 
         // ============================================
@@ -1188,6 +1207,7 @@
                         plannerStatusMessage.textContent = 'Task updated.';
                         setTimeout(() => closeTaskPlanner(), 350);
                     } catch (error) {
+                showToast('Failed to update task.', 'error');
                         console.error('Error updating task:', error);
                         plannerStatusMessage.textContent = 'Failed to update task. Please try again.';
                         plannerSaveBtn.disabled = false;
@@ -1202,6 +1222,7 @@
                         updateTaskComposerSummary(plannerContext.type);
                     }
                     plannerStatusMessage.textContent = 'Defaults updated.';
+                    showToast('Default settings have been updated.', 'info');
                     setTimeout(() => closeTaskPlanner(), 250);
                 }
             });
@@ -1251,8 +1272,7 @@
                     if (snap.exists()) {
                         userTags = snap.data().tags || [];
                         renderTagList();
-                        renderTagsPicker(homeworkTagsPicker, 'homework');
-                        renderTagsPicker(revisionTagsPicker, 'revision');
+                        renderTagsPicker(homeworkTagsPicker, 'homework'); // Only one picker to update
                     }
                 });
             } else {
@@ -1274,7 +1294,7 @@
                 googleAccessToken = cred?.accessToken || null;
             } catch (error) {
                 console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
+                showToast('Login failed: ' + error.message, 'error');
             }
         });
 
@@ -1282,6 +1302,7 @@
         signOutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
+                showToast('You have been signed out.', 'info');
             } catch (error) {
                 console.error('Sign out error:', error);
             }
@@ -1352,6 +1373,7 @@
                 if (!task.dueDate) {
                     openTaskPlanner({ mode: 'edit', type: task.type || 'homework', taskId: task.id, taskData: task });
                     setCalendarStatus('Set a due date, then try again.');
+                    showToast('Please set a due date for the task first.', 'info');
                     return;
                 }
                 // Create all-day event on due date
@@ -1377,10 +1399,12 @@
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message || 'Failed to create event');
                 setCalendarStatus('Event added to your calendar.');
+                showToast('Task added to Google Calendar!');
                 fetchUpcomingEvents();
             } catch (e) {
                 console.error('Add to calendar failed:', e);
                 setCalendarStatus('Could not add to calendar.');
+                showToast('Could not add task to calendar.', 'error');
             }
         }
 
@@ -1389,9 +1413,11 @@
                 try {
                     setCalendarStatus('Connecting…');
                     await ensureCalendarAccess();
-                    setCalendarStatus('Connected.');
+                    setCalendarStatus('');
+                    showToast('Google Calendar connected successfully!');
                     fetchUpcomingEvents();
                 } catch {
+                    showToast('Failed to connect Google Calendar.', 'error');
                     setCalendarStatus('Connection failed.');
                 }
             });
@@ -1427,10 +1453,7 @@
             const colorBadge = getColorBadge(task.color);
             const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
             const tagsBadges = (task.tags || []).map(tag => renderTagChip(tag, false)).join('');
-            const typeBadge = task.type === 'homework'
-                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:rgba(59, 130, 246, 0.15); border-color:rgba(59, 130, 246, 0.35); color:#bfdbfe"><span class="w-2 h-2 rounded-full" style="background-color:#60a5fa"></span>Homework</span>`
-                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.35); color:#6ee7b7"><span class="w-2 h-2 rounded-full" style="background-color:#10b981"></span>Revision</span>`;
-            metadataPieces.unshift(typeBadge);
+            
             if (formattedDueDate) {
                 metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
             }
@@ -1460,11 +1483,9 @@
                         <button class="rounded-lg border border-emerald-500/40 bg-emerald-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 hover:bg-emerald-600/30 focus:outline-none focus:ring-2 focus:ring-emerald-500" data-add-to-calendar="${task.id}">
                             Add to Calendar
                         </button>
-                        ${task.type === 'homework' ? `
                         <button class="rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-purple-200 hover:bg-purple-600/30 focus:outline-none focus:ring-2 focus:ring-purple-500" data-task-id="${task.id}" data-add-exercise>
                             ${task.exercises && task.exercises.length ? 'Edit Exercises' : 'Add Exercises'}
                         </button>
-                        ` : ``}
                     </div>
                 </div>
             `;
@@ -1541,135 +1562,6 @@
             });
         }
 
-        function loadHomeworkTasks() {
-            if (!currentUser) return;
-
-            const q = query(
-                collection(db, 'tasks'),
-                where('userId', '==', currentUser.uid),
-                where('type', '==', 'homework')
-            );
-
-            onSnapshot(q, (snapshot) => {
-                homeworkList.innerHTML = '';
-                
-                snapshot.forEach((docSnap) => {
-                    const task = { id: docSnap.id, ...docSnap.data() };
-                    renderHomeworkTask(task);
-                });
-
-                if (snapshot.empty) {
-                    homeworkList.innerHTML = '<p class="text-sm text-gray-400">No homework tasks yet.</p>';
-                }
-            });
-        }
-
-        function renderHomeworkTask(task) {
-            const taskDiv = document.createElement('div');
-            taskDiv.className = 'bg-gray-700 rounded p-3 space-y-2';
-            
-            const isCompleted = task.completed || false;
-            const exercises = task.exercises || [];
-            const formattedDueDate = formatDueDate(task.dueDate);
-            const metadataPieces = [];
-            const colorBadge = getColorBadge(task.color);
-            const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
-            if (formattedDueDate) {
-                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
-            }
-            if (colorBadge) {
-                metadataPieces.push(colorBadge);
-            }
-            if (priorityBadge) {
-                metadataPieces.push(priorityBadge);
-            }
-
-            taskDiv.innerHTML = `
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
-                    <div class="flex flex-1 gap-3">
-                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                               class="mt-1 w-4 h-4 flex-shrink-0 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
-                               data-task-id="${task.id}">
-                        <div class="flex-1">
-                            <label class="font-medium ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
-                            ${metadataPieces.length ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}</div>` : ''}
-                            ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/60 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
-                            ${exercises.length > 0 ? `
-                                <div class="mt-3 space-y-2 rounded-lg border border-gray-700/60 bg-gray-800/40 p-3">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Exercises</p>
-                                    ${exercises.map((exercise, idx) => `
-                                        <label class="flex items-center gap-2 text-sm ${exercise.completed ? 'line-through text-gray-400' : 'text-gray-300'}">
-                                            <input type="checkbox" ${exercise.completed ? 'checked' : ''}
-                                                   class="h-3 w-3 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
-                                                   data-task-id="${task.id}"
-                                                   data-exercise-idx="${idx}">
-                                            <span>${exercise.text}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
-                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-task="${task.id}">
-                            Edit
-                        </button>
-                        <button class="rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-purple-200 hover:bg-purple-600/30 focus:outline-none focus:ring-2 focus:ring-purple-500" data-task-id="${task.id}" data-add-exercise>
-                            ${exercises.length === 0 ? 'Add Exercises' : 'Edit Exercises'}
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Main checkbox handler
-            const mainCheckbox = taskDiv.querySelector('input[type="checkbox"]:first-of-type');
-            mainCheckbox.addEventListener('change', async (e) => {
-                const taskRef = doc(db, 'tasks', task.id);
-                await updateDoc(taskRef, {
-                    completed: e.target.checked
-                });
-            });
-
-            // Exercise checkbox handlers
-            taskDiv.querySelectorAll('input[type="checkbox"]:not(:first-of-type)').forEach((checkbox) => {
-                checkbox.addEventListener('change', async (e) => {
-                    const taskRef = doc(db, 'tasks', task.id);
-                    const idx = parseInt(e.target.dataset.exerciseIdx);
-                    const updatedExercises = [...exercises];
-                    updatedExercises[idx].completed = e.target.checked;
-                    
-                    await updateDoc(taskRef, {
-                        exercises: updatedExercises
-                    });
-                });
-            });
-
-            // Add/Edit exercises button
-            const addExerciseBtn = taskDiv.querySelector('[data-add-exercise]');
-            addExerciseBtn.addEventListener('click', () => {
-                currentTaskId = task.id;
-                exerciseList.innerHTML = '';
-                exercises.forEach((exercise, idx) => {
-                    addExerciseToModal(exercise.text, idx);
-                });
-                exerciseModal.classList.remove('hidden');
-            });
-
-            const editTaskBtn = taskDiv.querySelector('[data-edit-task]');
-            if (editTaskBtn) {
-                editTaskBtn.addEventListener('click', () => {
-                    openTaskPlanner({
-                        mode: 'edit',
-                        type: 'homework',
-                        taskId: task.id,
-                        taskData: task
-                    });
-                });
-            }
-
-            homeworkList.appendChild(taskDiv);
-        }
-
         // Add homework task
         addHomeworkBtn.addEventListener('click', async () => {
             const title = homeworkInput.value.trim();
@@ -1680,7 +1572,7 @@
             try {
                 await addDoc(collection(db, 'tasks'), {
                     title: title,
-                    type: 'homework',
+                    type: 'homework', // This is now the only type
                     completed: false,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp(),
@@ -1696,140 +1588,16 @@
                     taskComposerState.homework.notes = '';
                     updateTaskComposerSummary('homework');
                 }
+                showToast('Task added successfully!');
             } catch (error) {
                 console.error('Error adding homework:', error);
-                alert('Failed to add homework task');
+                showToast('Failed to add task.', 'error');
             }
         });
 
         homeworkInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 addHomeworkBtn.click();
-            }
-        });
-
-        // ============================================
-        // REVISION TASKS
-        // ============================================
-        function loadRevisionTasks() {
-            if (!currentUser) return;
-
-            const q = query(
-                collection(db, 'tasks'),
-                where('userId', '==', currentUser.uid),
-                where('type', '==', 'revision')
-            );
-
-            onSnapshot(q, (snapshot) => {
-                revisionList.innerHTML = '';
-                
-                snapshot.forEach((docSnap) => {
-                    const task = { id: docSnap.id, ...docSnap.data() };
-                    renderRevisionTask(task);
-                });
-
-                if (snapshot.empty) {
-                    revisionList.innerHTML = '<p class="text-sm text-gray-400">No revision tasks yet.</p>';
-                }
-            });
-        }
-
-        function renderRevisionTask(task) {
-            const taskDiv = document.createElement('div');
-            taskDiv.className = 'bg-gray-700 rounded p-3';
-            
-            const isCompleted = task.completed || false;
-            const formattedDueDate = formatDueDate(task.dueDate);
-            const metadataPieces = [];
-            const colorBadge = getColorBadge(task.color);
-            const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
-            if (formattedDueDate) {
-                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
-            }
-            if (colorBadge) {
-                metadataPieces.push(colorBadge);
-            }
-            if (priorityBadge) {
-                metadataPieces.push(priorityBadge);
-            }
-            
-            taskDiv.innerHTML = `
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
-                    <label class="flex flex-1 items-start gap-3">
-                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                               class="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-500 bg-gray-600 text-green-500 focus:ring-green-500"
-                               data-task-id="${task.id}">
-                        <div class="flex-1">
-                            <span class="${isCompleted ? 'line-through text-gray-400' : 'text-white'} font-medium">${task.title}</span>
-                            ${metadataPieces.length ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}</div>` : ''}
-                            ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/50 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
-                        </div>
-                    </label>
-                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
-                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-revision="${task.id}">
-                            Edit
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            const checkbox = taskDiv.querySelector('input[type="checkbox"]');
-            checkbox.addEventListener('change', async (e) => {
-                const taskRef = doc(db, 'tasks', task.id);
-                await updateDoc(taskRef, {
-                    completed: e.target.checked
-                });
-            });
-
-            const editRevisionBtn = taskDiv.querySelector('[data-edit-revision]');
-            if (editRevisionBtn) {
-                editRevisionBtn.addEventListener('click', () => {
-                    openTaskPlanner({
-                        mode: 'edit',
-                        type: 'revision',
-                        taskId: task.id,
-                        taskData: task
-                    });
-                });
-            }
-
-            revisionList.appendChild(taskDiv);
-        }
-
-        // Add revision task
-        addRevisionBtn.addEventListener('click', async () => {
-            const title = revisionInput.value.trim();
-            if (!title || !currentUser) return;
-
-            const settings = taskComposerState.revision;
-
-            try {
-                await addDoc(collection(db, 'tasks'), {
-                    title: title,
-                    type: 'revision',
-                    completed: false,
-                    userId: currentUser.uid,
-                    createdAt: serverTimestamp(),
-                    dueDate: settings.dueDate || null,
-                    color: settings.color === 'none' ? null : settings.color,
-                    priority: settings.priority || 'medium',
-                    notes: settings.notes?.trim() || '',
-                    tags: (settings.tags || []).map(t => ({ id: t.id, name: t.name, color: t.color }))
-                });
-                revisionInput.value = '';
-                if (taskComposerState.revision.notes) {
-                    taskComposerState.revision.notes = '';
-                    updateTaskComposerSummary('revision');
-                }
-            } catch (error) {
-                console.error('Error adding revision:', error);
-                alert('Failed to add revision task');
-            }
-        });
-
-        revisionInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addRevisionBtn.click();
             }
         });
 
@@ -1889,7 +1657,7 @@
             if (!friendUid || !currentUser) return;
 
             if (friendUid === currentUser.uid) {
-                alert('You cannot add yourself as a friend!');
+                showToast('You cannot add yourself as a friend!', 'error');
                 return;
             }
 
@@ -1899,9 +1667,10 @@
                     friends: arrayUnion(friendUid)
                 });
                 friendInput.value = '';
+                showToast('Friend added successfully!');
             } catch (error) {
                 console.error('Error adding friend:', error);
-                alert('Failed to add friend. Make sure the User ID is correct.');
+                showToast('Failed to add friend. Check the User ID.', 'error');
             }
         });
 
@@ -1920,8 +1689,10 @@
                 await updateDoc(userRef, {
                     friends: arrayRemove(friendUid)
                 });
+                showToast('Friend removed.', 'info');
             } catch (error) {
                 console.error('Error removing friend:', error);
+                showToast('Failed to remove friend.', 'error');
             }
         }
 
@@ -2001,7 +1772,7 @@
                                 const colorBadge = getColorBadge(item.color);
                                 const priorityBadge = item.priority ? getPriorityBadge(item.priority) : '';
                                 const tagBadges = (item.tags || []).map(tag => renderTagChip(tag, false)).join('');
-                                metadataPieces.push(`<span>${item.type === 'homework' ? '📚 Homework' : '📖 Revision'}</span>`);
+                                metadataPieces.push(`<span>📚 Task</span>`);
                                 if (formattedDueDate) {
                                     metadataPieces.push(`<span>Due ${formattedDueDate}</span>`);
                                 }
@@ -2127,7 +1898,7 @@
                 });
             } else {
                 exerciseDiv.innerHTML = `
-                    <span class="text-white flex-1">${text}</span>
+                    <span class="text-white flex-1 break-all">${text}</span>
                     <button class="text-red-400 hover:text-red-300 text-sm" data-remove-exercise-new>Remove</button>
                 `;
                 
@@ -2187,10 +1958,11 @@
                     currentExercises = [];
                     exerciseList.innerHTML = '';
                     exerciseInput.value = '';
+                    showToast('Exercises saved!');
                 }
             } catch (error) {
                 console.error('Error saving exercises:', error);
-                alert('Failed to save exercises');
+                showToast('Failed to save exercises.', 'error');
             }
         });
 
