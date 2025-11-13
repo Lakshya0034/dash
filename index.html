@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for dark mode */
+        body {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Login Screen (shown when user is not authenticated) -->
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-8 text-white">StudyHub Dashboard</h1>
+            <button id="loginBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center gap-2 mx-auto">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Login with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard (shown when user is authenticated) -->
+    <div id="dashboard" class="hidden p-4 md:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">StudyHub Dashboard</h1>
+            <p class="text-gray-400">Welcome back! Let's get productive.</p>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <!-- Profile Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Profile</h2>
+                <div id="profileContent" class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <img id="userPhoto" src="" alt="User" class="w-16 h-16 rounded-full border-2 border-gray-600">
+                        <div>
+                            <p id="userName" class="font-semibold text-white"></p>
+                            <p id="userEmail" class="text-sm text-gray-400"></p>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-700">
+                        <p class="text-sm text-gray-400 mb-2">Your User ID:</p>
+                        <p id="userId" class="text-xs font-mono bg-gray-700 p-2 rounded break-all text-gray-300"></p>
+                    </div>
+                    <button id="signOutBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Homework Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Homework</h2>
+                <div class="space-y-4">
+                    <!-- Add Homework Form -->
+                    <div class="flex gap-2">
+                        <input type="text" id="homeworkInput" placeholder="Add homework task..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
+                        <button id="addHomeworkBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Add
+                        </button>
+                    </div>
+                    <!-- Homework List -->
+                    <div id="homeworkList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Revision Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Revision</h2>
+                <div class="space-y-4">
+                    <!-- Add Revision Form -->
+                    <div class="flex gap-2">
+                        <input type="text" id="revisionInput" placeholder="Add revision task..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
+                        <button id="addRevisionBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Add
+                        </button>
+                    </div>
+                    <!-- Revision List -->
+                    <div id="revisionList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Friends Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Friends</h2>
+                <div class="space-y-4">
+                    <!-- Add Friend Form -->
+                    <div class="flex gap-2">
+                        <input type="text" id="friendInput" placeholder="Friend's User ID..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500 text-sm">
+                        <button id="addFriendBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Add
+                        </button>
+                    </div>
+                    <!-- Friends List -->
+                    <div id="friendsList" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-sm text-gray-400">No friends yet. Add a friend by their User ID!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friends' Activity Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Friends' Activity</h2>
+                <div id="friendsActivity" class="space-y-3 max-h-96 overflow-y-auto">
+                    <p class="text-sm text-gray-400">No activity to show. Add friends to see their progress!</p>
+                </div>
+            </div>
+
+            <!-- Study Timer Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Study Timer</h2>
+                <div class="text-center space-y-4">
+                    <div id="timerDisplay" class="text-5xl font-mono font-bold text-blue-400">25:00</div>
+                    <div class="flex gap-2 justify-center">
+                        <button id="timerStartBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Start
+                        </button>
+                        <button id="timerPauseBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Pause
+                        </button>
+                        <button id="timerResetBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            Reset
+                        </button>
+                    </div>
+                    <p id="timerStatus" class="text-sm text-gray-400">Ready to start</p>
+                </div>
+            </div>
+
+            <!-- Google Calendar Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Google Calendar</h2>
+                <div class="aspect-video bg-gray-700 rounded overflow-hidden">
+                    <iframe id="calendarFrame" src="" class="w-full h-full border-0" allow="calendar"></iframe>
+                    <p class="text-sm text-gray-400 p-4 text-center">Add your public calendar embed URL</p>
+                </div>
+            </div>
+
+            <!-- Music Widget -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Music</h2>
+                <div class="aspect-video bg-gray-700 rounded overflow-hidden">
+                    <iframe id="musicFrame" src="" class="w-full h-full border-0" allow="autoplay"></iframe>
+                    <p class="text-sm text-gray-400 p-4 text-center">Add your Spotify/YouTube playlist embed URL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Homework Exercise Modal -->
+    <div id="exerciseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white">Add Exercises</h3>
+                <button id="closeExerciseModal" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div class="flex gap-2">
+                    <input type="text" id="exerciseInput" placeholder="Exercise name..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
+                    <button id="addExerciseBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                        Add
+                    </button>
+                </div>
+                <div id="exerciseList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                <button id="saveExercisesBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Save Exercises
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase modules from CDN
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc, serverTimestamp, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        // TODO: Replace with your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpZlB5V3ZIC4snTND51JBqPJlEzsvWpKs",
+            authDomain: "study-dashboard-71a54.firebaseapp.com",
+            projectId: "study-dashboard-71a54",
+            storageBucket: "study-dashboard-71a54.firebasestorage.app",
+            messagingSenderId: "92963704725",
+            appId: "1:92963704725:web:5f8b09216e09862fb3b09c"
+        };
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('loginBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userPhoto = document.getElementById('userPhoto');
+        const userId = document.getElementById('userId');
+
+        // Homework elements
+        const homeworkInput = document.getElementById('homeworkInput');
+        const addHomeworkBtn = document.getElementById('addHomeworkBtn');
+        const homeworkList = document.getElementById('homeworkList');
+
+        // Revision elements
+        const revisionInput = document.getElementById('revisionInput');
+        const addRevisionBtn = document.getElementById('addRevisionBtn');
+        const revisionList = document.getElementById('revisionList');
+
+        // Friends elements
+        const friendInput = document.getElementById('friendInput');
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        const friendsList = document.getElementById('friendsList');
+
+        // Friends' Activity elements
+        const friendsActivity = document.getElementById('friendsActivity');
+
+        // Timer elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerStartBtn = document.getElementById('timerStartBtn');
+        const timerPauseBtn = document.getElementById('timerPauseBtn');
+        const timerResetBtn = document.getElementById('timerResetBtn');
+        const timerStatus = document.getElementById('timerStatus');
+
+        // Exercise Modal elements
+        const exerciseModal = document.getElementById('exerciseModal');
+        const exerciseInput = document.getElementById('exerciseInput');
+        const addExerciseBtn = document.getElementById('addExerciseBtn');
+        const exerciseList = document.getElementById('exerciseList');
+        const saveExercisesBtn = document.getElementById('saveExercisesBtn');
+        const closeExerciseModal = document.getElementById('closeExerciseModal');
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        let currentUser = null;
+        let currentTaskId = null; // For exercise modal
+
+        // Monitor authentication state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                
+                // Update profile
+                userName.textContent = user.displayName || 'User';
+                userEmail.textContent = user.email;
+                userPhoto.src = user.photoURL || '';
+                userId.textContent = user.uid;
+
+                // Initialize user document in Firestore
+                await initializeUserDocument(user);
+
+                // Load all data
+                loadHomeworkTasks();
+                loadRevisionTasks();
+                loadFriends();
+                loadFriendsActivity();
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+                dashboard.classList.add('hidden');
+            }
+        });
+
+        // Login with Google
+        loginBtn.addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+
+        // Sign out
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
+        });
+
+        // ============================================
+        // FIRESTORE: USER DOCUMENT INITIALIZATION
+        // ============================================
+        async function initializeUserDocument(user) {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (!userSnap.exists()) {
+                // Create user document if it doesn't exist
+                await setDoc(userRef, {
+                    email: user.email,
+                    displayName: user.displayName || 'User',
+                    friends: []
+                });
+            }
+        }
+
+        // ============================================
+        // HOMEWORK TASKS
+        // ============================================
+        function loadHomeworkTasks() {
+            if (!currentUser) return;
+
+            const q = query(
+                collection(db, 'tasks'),
+                where('userId', '==', currentUser.uid),
+                where('type', '==', 'homework')
+            );
+
+            onSnapshot(q, (snapshot) => {
+                homeworkList.innerHTML = '';
+                
+                snapshot.forEach((docSnap) => {
+                    const task = { id: docSnap.id, ...docSnap.data() };
+                    renderHomeworkTask(task);
+                });
+
+                if (snapshot.empty) {
+                    homeworkList.innerHTML = '<p class="text-sm text-gray-400">No homework tasks yet.</p>';
+                }
+            });
+        }
+
+        function renderHomeworkTask(task) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'bg-gray-700 rounded p-3 space-y-2';
+            
+            const isCompleted = task.completed || false;
+            const exercises = task.exercises || [];
+            const allExercisesCompleted = exercises.length > 0 && exercises.every(ex => ex.completed);
+
+            taskDiv.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                           class="mt-1 w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
+                           data-task-id="${task.id}">
+                    <div class="flex-1">
+                        <label class="font-medium ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
+                        ${exercises.length > 0 ? `
+                            <div class="mt-2 ml-4 space-y-1">
+                                ${exercises.map((exercise, idx) => `
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" ${exercise.completed ? 'checked' : ''}
+                                               class="w-3 h-3 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
+                                               data-task-id="${task.id}"
+                                               data-exercise-idx="${idx}">
+                                        <label class="text-sm ${exercise.completed ? 'line-through text-gray-400' : 'text-gray-300'}">${exercise.text}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <button class="text-blue-400 hover:text-blue-300 text-sm" data-task-id="${task.id}" data-add-exercise>
+                        ${exercises.length === 0 ? 'Add Exercises' : 'Edit Exercises'}
+                    </button>
+                </div>
+            `;
+
+            // Main checkbox handler
+            const mainCheckbox = taskDiv.querySelector('input[type="checkbox"]:first-of-type');
+            mainCheckbox.addEventListener('change', async (e) => {
+                const taskRef = doc(db, 'tasks', task.id);
+                await updateDoc(taskRef, {
+                    completed: e.target.checked
+                });
+            });
+
+            // Exercise checkbox handlers
+            taskDiv.querySelectorAll('input[type="checkbox"]:not(:first-of-type)').forEach((checkbox) => {
+                checkbox.addEventListener('change', async (e) => {
+                    const taskRef = doc(db, 'tasks', task.id);
+                    const idx = parseInt(e.target.dataset.exerciseIdx);
+                    const updatedExercises = [...exercises];
+                    updatedExercises[idx].completed = e.target.checked;
+                    
+                    await updateDoc(taskRef, {
+                        exercises: updatedExercises
+                    });
+                });
+            });
+
+            // Add/Edit exercises button
+            const addExerciseBtn = taskDiv.querySelector('[data-add-exercise]');
+            addExerciseBtn.addEventListener('click', () => {
+                currentTaskId = task.id;
+                exerciseList.innerHTML = '';
+                exercises.forEach((exercise, idx) => {
+                    addExerciseToModal(exercise.text, idx);
+                });
+                exerciseModal.classList.remove('hidden');
+            });
+
+            homeworkList.appendChild(taskDiv);
+        }
+
+        // Add homework task
+        addHomeworkBtn.addEventListener('click', async () => {
+            const title = homeworkInput.value.trim();
+            if (!title || !currentUser) return;
+
+            try {
+                await addDoc(collection(db, 'tasks'), {
+                    title: title,
+                    type: 'homework',
+                    completed: false,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp(),
+                    exercises: []
+                });
+                homeworkInput.value = '';
+            } catch (error) {
+                console.error('Error adding homework:', error);
+                alert('Failed to add homework task');
+            }
+        });
+
+        homeworkInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addHomeworkBtn.click();
+            }
+        });
+
+        // ============================================
+        // REVISION TASKS
+        // ============================================
+        function loadRevisionTasks() {
+            if (!currentUser) return;
+
+            const q = query(
+                collection(db, 'tasks'),
+                where('userId', '==', currentUser.uid),
+                where('type', '==', 'revision')
+            );
+
+            onSnapshot(q, (snapshot) => {
+                revisionList.innerHTML = '';
+                
+                snapshot.forEach((docSnap) => {
+                    const task = { id: docSnap.id, ...docSnap.data() };
+                    renderRevisionTask(task);
+                });
+
+                if (snapshot.empty) {
+                    revisionList.innerHTML = '<p class="text-sm text-gray-400">No revision tasks yet.</p>';
+                }
+            });
+        }
+
+        function renderRevisionTask(task) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'flex items-center gap-2 bg-gray-700 rounded p-2';
+            
+            const isCompleted = task.completed || false;
+            
+            taskDiv.innerHTML = `
+                <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                       class="w-4 h-4 text-green-600 bg-gray-600 border-gray-500 rounded focus:ring-green-500"
+                       data-task-id="${task.id}">
+                <label class="flex-1 ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
+            `;
+
+            const checkbox = taskDiv.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', async (e) => {
+                const taskRef = doc(db, 'tasks', task.id);
+                await updateDoc(taskRef, {
+                    completed: e.target.checked
+                });
+            });
+
+            revisionList.appendChild(taskDiv);
+        }
+
+        // Add revision task
+        addRevisionBtn.addEventListener('click', async () => {
+            const title = revisionInput.value.trim();
+            if (!title || !currentUser) return;
+
+            try {
+                await addDoc(collection(db, 'tasks'), {
+                    title: title,
+                    type: 'revision',
+                    completed: false,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+                revisionInput.value = '';
+            } catch (error) {
+                console.error('Error adding revision:', error);
+                alert('Failed to add revision task');
+            }
+        });
+
+        revisionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addRevisionBtn.click();
+            }
+        });
+
+        // ============================================
+        // FRIENDS
+        // ============================================
+        function loadFriends() {
+            if (!currentUser) return;
+
+            const userRef = doc(db, 'users', currentUser.uid);
+            onSnapshot(userRef, async (snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.data();
+                    const friends = userData.friends || [];
+                    
+                    if (friends.length === 0) {
+                        friendsList.innerHTML = '<p class="text-sm text-gray-400">No friends yet. Add a friend by their User ID!</p>';
+                        return;
+                    }
+
+                    friendsList.innerHTML = '';
+                    
+                    // Fetch friend details
+                    for (const friendUid of friends) {
+                        try {
+                            const friendDoc = await getDoc(doc(db, 'users', friendUid));
+                            if (friendDoc.exists()) {
+                                const friendData = friendDoc.data();
+                                const friendDiv = document.createElement('div');
+                                friendDiv.className = 'bg-gray-700 rounded p-2 flex items-center justify-between';
+                                friendDiv.innerHTML = `
+                                    <div>
+                                        <p class="text-white font-medium">${friendData.displayName || 'Unknown'}</p>
+                                        <p class="text-xs text-gray-400">${friendData.email || friendUid}</p>
+                                    </div>
+                                    <button class="text-red-400 hover:text-red-300 text-sm" data-remove-friend="${friendUid}">Remove</button>
+                                `;
+                                
+                                const removeBtn = friendDiv.querySelector('[data-remove-friend]');
+                                removeBtn.addEventListener('click', async () => {
+                                    await removeFriend(friendUid);
+                                });
+                                
+                                friendsList.appendChild(friendDiv);
+                            }
+                        } catch (error) {
+                            console.error('Error loading friend:', error);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add friend
+        addFriendBtn.addEventListener('click', async () => {
+            const friendUid = friendInput.value.trim();
+            if (!friendUid || !currentUser) return;
+
+            if (friendUid === currentUser.uid) {
+                alert('You cannot add yourself as a friend!');
+                return;
+            }
+
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, {
+                    friends: arrayUnion(friendUid)
+                });
+                friendInput.value = '';
+            } catch (error) {
+                console.error('Error adding friend:', error);
+                alert('Failed to add friend. Make sure the User ID is correct.');
+            }
+        });
+
+        friendInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addFriendBtn.click();
+            }
+        });
+
+        // Remove friend
+        async function removeFriend(friendUid) {
+            if (!currentUser) return;
+            
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, {
+                    friends: arrayRemove(friendUid)
+                });
+            } catch (error) {
+                console.error('Error removing friend:', error);
+            }
+        }
+
+        // ============================================
+        // FRIENDS' ACTIVITY
+        // ============================================
+        function loadFriendsActivity() {
+            if (!currentUser) return;
+
+            const userRef = doc(db, 'users', currentUser.uid);
+            onSnapshot(userRef, async (snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.data();
+                    const friends = userData.friends || [];
+                    
+                    if (friends.length === 0) {
+                        friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No activity to show. Add friends to see their progress!</p>';
+                        return;
+                    }
+
+                    // Query tasks from all friends
+                    // Note: Firestore 'in' queries are limited to 10 items
+                    // For more friends, we'd need to batch queries
+                    const friendChunks = [];
+                    for (let i = 0; i < friends.length; i += 10) {
+                        friendChunks.push(friends.slice(i, i + 10));
+                    }
+
+                    friendsActivity.innerHTML = '';
+
+                    for (const chunk of friendChunks) {
+                        const q = query(
+                            collection(db, 'tasks'),
+                            where('userId', 'in', chunk),
+                            where('completed', '==', true)
+                        );
+
+                        onSnapshot(q, async (snapshot) => {
+                            if (snapshot.empty && friendsActivity.innerHTML === '') {
+                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No completed tasks from friends yet.</p>';
+                                return;
+                            }
+
+                            // Clear and rebuild activity list
+                            const existingItems = [];
+                            snapshot.forEach((docSnap) => {
+                                const task = { id: docSnap.id, ...docSnap.data() };
+                                existingItems.push(task);
+                            });
+
+                            // Get friend names
+                            const activityItems = await Promise.all(
+                                existingItems.map(async (task) => {
+                                    try {
+                                        const friendDoc = await getDoc(doc(db, 'users', task.userId));
+                                        const friendData = friendDoc.exists() ? friendDoc.data() : null;
+                                        return {
+                                            ...task,
+                                            friendName: friendData?.displayName || 'Unknown'
+                                        };
+                                    } catch (error) {
+                                        return { ...task, friendName: 'Unknown' };
+                                    }
+                                })
+                            );
+
+                            // Sort by creation time (newest first)
+                            activityItems.sort((a, b) => {
+                                const aTime = a.createdAt?.toMillis() || 0;
+                                const bTime = b.createdAt?.toMillis() || 0;
+                                return bTime - aTime;
+                            });
+
+                            friendsActivity.innerHTML = activityItems.map(item => `
+                                <div class="bg-gray-700 rounded p-3">
+                                    <p class="text-white">
+                                        <span class="font-semibold text-blue-400">${item.friendName}</span>
+                                        completed
+                                        <span class="font-medium">${item.title}</span>
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        ${item.type === 'homework' ? '📚 Homework' : '📖 Revision'}
+                                    </p>
+                                </div>
+                            `).join('');
+
+                            if (friendsActivity.innerHTML === '') {
+                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No completed tasks from friends yet.</p>';
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // STUDY TIMER (POMODORO)
+        // ============================================
+        let timerInterval = null;
+        let timerSeconds = 25 * 60; // 25 minutes in seconds
+        let isBreak = false;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            timerStatus.textContent = isBreak ? 'Break time!' : 'Study time!';
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    
+                    if (!isBreak) {
+                        // Switch to break
+                        isBreak = true;
+                        timerSeconds = 5 * 60; // 5 minutes break
+                        timerStatus.textContent = 'Break time! Take a rest.';
+                        updateTimerDisplay();
+                        // Auto-start break timer
+                        setTimeout(() => {
+                            startTimer();
+                        }, 1000);
+                    } else {
+                        // Break finished, reset to study
+                        isBreak = false;
+                        timerSeconds = 25 * 60;
+                        timerStatus.textContent = 'Break finished! Ready for another session.';
+                        updateTimerDisplay();
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                timerStatus.textContent = isBreak ? 'Break paused' : 'Study paused';
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            isBreak = false;
+            timerSeconds = 25 * 60;
+            timerStatus.textContent = 'Ready to start';
+            updateTimerDisplay();
+        }
+
+        timerStartBtn.addEventListener('click', startTimer);
+        timerPauseBtn.addEventListener('click', pauseTimer);
+        timerResetBtn.addEventListener('click', resetTimer);
+
+        // ============================================
+        // EXERCISE MODAL
+        // ============================================
+        let currentExercises = [];
+
+        function addExerciseToModal(text, idx = null) {
+            const exerciseDiv = document.createElement('div');
+            exerciseDiv.className = 'flex items-center gap-2 bg-gray-700 rounded p-2';
+            
+            if (idx !== null) {
+                exerciseDiv.innerHTML = `
+                    <span class="text-white flex-1">${text}</span>
+                    <button class="text-red-400 hover:text-red-300 text-sm" data-remove-exercise="${idx}">Remove</button>
+                `;
+                
+                const removeBtn = exerciseDiv.querySelector('[data-remove-exercise]');
+                removeBtn.addEventListener('click', () => {
+                    currentExercises.splice(idx, 1);
+                    exerciseDiv.remove();
+                });
+            } else {
+                exerciseDiv.innerHTML = `
+                    <span class="text-white flex-1">${text}</span>
+                    <button class="text-red-400 hover:text-red-300 text-sm" data-remove-exercise-new>Remove</button>
+                `;
+                
+                const removeBtn = exerciseDiv.querySelector('[data-remove-exercise-new]');
+                removeBtn.addEventListener('click', () => {
+                    exerciseDiv.remove();
+                    const idx = Array.from(exerciseList.children).indexOf(exerciseDiv);
+                    if (idx >= 0 && idx < currentExercises.length) {
+                        currentExercises.splice(idx, 1);
+                    }
+                });
+            }
+            
+            exerciseList.appendChild(exerciseDiv);
+        }
+
+        addExerciseBtn.addEventListener('click', () => {
+            const text = exerciseInput.value.trim();
+            if (!text) return;
+
+            currentExercises.push({ text: text, completed: false });
+            addExerciseToModal(text);
+            exerciseInput.value = '';
+        });
+
+        exerciseInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addExerciseBtn.click();
+            }
+        });
+
+        saveExercisesBtn.addEventListener('click', async () => {
+            if (!currentTaskId || !currentUser) return;
+
+            try {
+                // Get existing exercises from the task
+                const taskRef = doc(db, 'tasks', currentTaskId);
+                const taskSnap = await getDoc(taskRef);
+                
+                if (taskSnap.exists()) {
+                    const existingExercises = taskSnap.data().exercises || [];
+                    // Merge: keep existing exercises, add new ones
+                    const allExercises = [...existingExercises];
+                    
+                    // Add new exercises that aren't duplicates
+                    currentExercises.forEach(newEx => {
+                        if (!allExercises.some(ex => ex.text === newEx.text)) {
+                            allExercises.push(newEx);
+                        }
+                    });
+
+                    await updateDoc(taskRef, {
+                        exercises: allExercises
+                    });
+
+                    exerciseModal.classList.add('hidden');
+                    currentExercises = [];
+                    exerciseList.innerHTML = '';
+                    exerciseInput.value = '';
+                }
+            } catch (error) {
+                console.error('Error saving exercises:', error);
+                alert('Failed to save exercises');
+            }
+        });
+
+        closeExerciseModal.addEventListener('click', () => {
+            exerciseModal.classList.add('hidden');
+            currentExercises = [];
+            exerciseList.innerHTML = '';
+            exerciseInput.value = '';
+        });
+
+        // Close modal on outside click
+        exerciseModal.addEventListener('click', (e) => {
+            if (e.target === exerciseModal) {
+                exerciseModal.classList.add('hidden');
+                currentExercises = [];
+                exerciseList.innerHTML = '';
+                exerciseInput.value = '';
+            }
+        });
+
+        // Initialize timer display
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
