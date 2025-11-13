@@ -33,80 +33,97 @@
     <!-- Dashboard (shown when user is authenticated) -->
     <div id="dashboard" class="hidden p-4 md:p-6 lg:p-8">
         <!-- Header -->
-        <header class="mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">StudyHub Dashboard</h1>
-            <p class="text-gray-400">Welcome back! Let's get productive.</p>
+        <header class="mb-6 flex items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">StudyHub Dashboard</h1>
+                <p class="text-gray-400">Welcome back! Let's get productive.</p>
+            </div>
+            <button id="menuToggle" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-2 text-sm font-semibold text-gray-200 shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+                </svg>
+                Menu
+            </button>
         </header>
 
         <!-- Main Grid Layout -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <!-- Profile Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Profile</h2>
-                <div id="profileContent" class="space-y-4">
-                    <div class="flex items-center gap-4">
-                        <img id="userPhoto" src="" alt="User" class="w-16 h-16 rounded-full border-2 border-gray-600">
-                        <div>
-                            <p id="userName" class="font-semibold text-white"></p>
-                            <p id="userEmail" class="text-sm text-gray-400"></p>
+            <!-- Profile Widget moved to side panel -->
+
+            <!-- Combined Tasks Widget (Left, spans 2 columns) -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6 md:col-span-2">
+                <h2 class="text-xl font-bold mb-4 text-white">Tasks</h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex gap-2 mb-3">
+                            <button class="px-3 py-1 text-sm font-medium rounded transition task-tab bg-gray-700 text-white border border-gray-600" data-tab-group="homework" data-tab="quick">
+                                Quick Add
+                            </button>
+                            <button class="px-3 py-1 text-sm font-medium rounded transition task-tab bg-gray-800 text-gray-300 border border-transparent hover:bg-gray-700/70" data-tab-group="homework" data-tab="advanced">
+                                Advanced Options
+                            </button>
+                        </div>
+                        <div class="flex flex-col gap-2 md:flex-row">
+                            <input type="text" id="homeworkInput" placeholder="Add homework task..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
+                            <button id="addHomeworkBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 md:self-stretch">
+                                Add
+                            </button>
+                        </div>
+                        <div id="homeworkAdvancedOptions" class="hidden mt-3 space-y-4 rounded-xl border border-gray-700/60 bg-gray-800/70 p-4">
+                            <div>
+                                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Quick due dates</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="rounded-full border border-gray-600 bg-gray-700 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-quick-homework-due="today">
+                                        Today
+                                    </button>
+                                    <button class="rounded-full border border-gray-600 bg-gray-700 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-quick-homework-due="tomorrow">
+                                        Tomorrow
+                                    </button>
+                                    <button class="rounded-full border border-gray-600 bg-gray-700 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-quick-homework-due="week">
+                                        Next week
+                                    </button>
+                                    <button class="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-400 hover:border-red-500 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500" data-quick-homework-due="clear">
+                                        Clear date
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                                <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Current settings</p>
+                                <div id="homeworkSettingsSummary" class="text-sm text-gray-300">No due date • Color: None • Priority: Medium</div>
+                            </div>
+                            <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Tags</p>
+                                <div id="homeworkTagsPicker" class="flex flex-wrap gap-2"></div>
+                                <p class="mt-1 text-xs text-gray-500">Manage tags in the side panel → Tags.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="homeworkPlannerBtn" class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-600/20 px-3 py-2 text-sm font-semibold text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M8 7h8M8 11h4M5 5h14a2 2 0 0 1 2 2v12l-4-3-4 3-4-3-4 3V7a2 2 0 0 1 2-2z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Open planner
+                                </button>
+                                <button id="homeworkClearSettingsBtn" class="inline-flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                    Reset settings
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="pt-4 border-t border-gray-700">
-                        <p class="text-sm text-gray-400 mb-2">Your User ID:</p>
-                        <p id="userId" class="text-xs font-mono bg-gray-700 p-2 rounded break-all text-gray-300"></p>
-                    </div>
-                    <button id="signOutBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                        Sign Out
+                    <!-- Combined Task List -->
+                    <div id="combinedTaskList" class="space-y-3 max-h-[38rem] overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Calendar Widget (Right column) -->
+            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-white">Google Calendar</h2>
+                <div class="space-y-3">
+                    <button id="connectCalendarBtn" class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        Connect Google Calendar
                     </button>
-                </div>
-            </div>
-
-            <!-- Homework Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Homework</h2>
-                <div class="space-y-4">
-                    <!-- Add Homework Form -->
-                    <div class="flex gap-2">
-                        <input type="text" id="homeworkInput" placeholder="Add homework task..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
-                        <button id="addHomeworkBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                            Add
-                        </button>
-                    </div>
-                    <!-- Homework List -->
-                    <div id="homeworkList" class="space-y-3 max-h-96 overflow-y-auto"></div>
-                </div>
-            </div>
-
-            <!-- Revision Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Revision</h2>
-                <div class="space-y-4">
-                    <!-- Add Revision Form -->
-                    <div class="flex gap-2">
-                        <input type="text" id="revisionInput" placeholder="Add revision task..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500">
-                        <button id="addRevisionBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                            Add
-                        </button>
-                    </div>
-                    <!-- Revision List -->
-                    <div id="revisionList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                </div>
-            </div>
-
-            <!-- Friends Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Friends</h2>
-                <div class="space-y-4">
-                    <!-- Add Friend Form -->
-                    <div class="flex gap-2">
-                        <input type="text" id="friendInput" placeholder="Friend's User ID..." class="flex-1 bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500 text-sm">
-                        <button id="addFriendBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                            Add
-                        </button>
-                    </div>
-                    <!-- Friends List -->
-                    <div id="friendsList" class="space-y-2 max-h-64 overflow-y-auto">
-                        <p class="text-sm text-gray-400">No friends yet. Add a friend by their User ID!</p>
+                    <div id="calendarStatus" class="text-xs text-gray-400"></div>
+                    <div id="upcomingEvents" class="space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-sm text-gray-400">Connect to see your upcoming events.</p>
                     </div>
                 </div>
             </div>
@@ -154,6 +171,199 @@
                 <div class="aspect-video bg-gray-700 rounded overflow-hidden">
                     <iframe id="musicFrame" src="" class="w-full h-full border-0" allow="autoplay"></iframe>
                     <p class="text-sm text-gray-400 p-4 text-center">Add your Spotify/YouTube playlist embed URL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div id="sidePanelOverlay" class="fixed inset-0 z-40 hidden bg-black/70 backdrop-blur-sm"></div>
+    <aside id="sidePanel" class="fixed inset-y-0 right-0 z-50 w-full max-w-md translate-x-full transform border-l border-gray-800 bg-gray-900/95 shadow-2xl transition-transform duration-300 ease-in-out lg:max-w-sm">
+        <div class="flex h-full flex-col">
+            <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-gray-500">Quick Actions</p>
+                    <h2 class="text-lg font-semibold text-white">Control Center</h2>
+                </div>
+                <button id="sidePanelCloseBtn" class="rounded-full border border-gray-700 bg-gray-800/70 p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M6 6l12 12M6 18L18 6" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="border-b border-gray-800 px-5 py-3">
+                <div class="flex gap-2">
+                    <button class="side-panel-tab rounded-lg border border-blue-500/60 bg-blue-600/20 px-3 py-2 text-sm font-semibold text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-side-panel-tab="friends">
+                        Friends
+                    </button>
+                    <button class="side-panel-tab rounded-lg border border-transparent bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600" data-side-panel-tab="music">
+                        Music Links
+                    </button>
+                    <button class="side-panel-tab rounded-lg border border-transparent bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600" data-side-panel-tab="profile">
+                        Profile
+                    </button>
+                    <button class="side-panel-tab rounded-lg border border-transparent bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600" data-side-panel-tab="tags">
+                        Tags
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto px-5 pb-6">
+                <div data-side-panel-section="friends" class="space-y-4">
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-2 text-sm font-semibold text-white">Add a friend</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="friendInput" placeholder="Friend's User ID..." class="flex-1 rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button id="addFriendBtn" class="rounded-lg bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                                Add
+                            </button>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-400">Share your User ID to connect with classmates.</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/40 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Friends list</h3>
+                        <div id="friendsList" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                            <p class="text-sm text-gray-400">No friends yet. Add a friend by their User ID!</p>
+                        </div>
+                    </div>
+                </div>
+                <div data-side-panel-section="music" class="hidden space-y-4">
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-2 text-sm font-semibold text-white">Music links</h3>
+                        <p class="mb-3 text-xs text-gray-400">Save playlists or lo-fi streams to launch them quickly. Links are stored locally on this device.</p>
+                        <div class="flex gap-2">
+                            <input type="url" id="musicLinkInput" placeholder="https://open.spotify.com/..." class="flex-1 rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <button id="addMusicLinkBtn" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/40 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Saved links</h3>
+                        <ul id="musicLinksList" class="space-y-2 text-sm text-gray-200"></ul>
+                        <p id="musicLinksEmptyState" class="text-xs text-gray-500">No links yet. Add your favorite playlists above.</p>
+                    </div>
+                </div>
+                <div data-side-panel-section="profile" class="hidden space-y-4">
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Your profile</h3>
+                        <div id="profileContent" class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <img id="userPhoto" src="" alt="User" class="h-16 w-16 rounded-full border-2 border-gray-600 object-cover">
+                                <div>
+                                    <p id="userName" class="font-semibold text-white"></p>
+                                    <p id="userEmail" class="text-sm text-gray-400"></p>
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                                <p class="text-xs uppercase tracking-wide text-gray-400">User ID</p>
+                                <p id="userId" class="mt-1 break-all rounded bg-gray-800 p-2 font-mono text-xs text-gray-300"></p>
+                            </div>
+                            <button id="signOutBtn" class="w-full rounded-lg bg-red-600 px-4 py-2 font-semibold text-white shadow hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div data-side-panel-section="tags" class="hidden space-y-4">
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-2 text-sm font-semibold text-white">Create a tag</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" id="newTagName" placeholder="Tag name (e.g., Math)" class="sm:col-span-2 rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select id="newTagColor" class="rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="red">Red</option>
+                                <option value="yellow">Yellow</option>
+                                <option value="purple">Purple</option>
+                                <option value="teal">Teal</option>
+                            </select>
+                        </div>
+                        <div class="mt-2">
+                            <button id="addTagBtn" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">Add tag</button>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/40 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Your tags</h3>
+                        <div id="tagList" class="flex flex-wrap gap-2"></div>
+                        <p id="tagListEmpty" class="text-xs text-gray-500">No tags yet. Create one above.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Task Planner Modal -->
+    <div id="taskPlannerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-2xl rounded-2xl border border-gray-800 bg-gray-900/95 shadow-2xl">
+            <div class="flex items-start justify-between border-b border-gray-800 px-6 py-4">
+                <div>
+                    <p id="plannerSubtitle" class="text-xs uppercase tracking-wide text-gray-500">Plan task</p>
+                    <h3 id="plannerTitle" class="text-xl font-semibold text-white">Task planner</h3>
+                </div>
+                <button id="plannerCloseBtn" class="rounded-full border border-gray-700 bg-gray-800/70 p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M6 6l12 12M6 18L18 6" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid gap-6 px-6 py-6 md:grid-cols-2">
+                <div class="space-y-4">
+                    <div>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Due date</p>
+                        <input type="date" id="plannerDueDate" class="w-full rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <button class="rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-planner-quick="today">Today</button>
+                            <button class="rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-planner-quick="tomorrow">Tomorrow</button>
+                            <button class="rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-200 hover:border-blue-500 hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-planner-quick="week">Next week</button>
+                            <button class="rounded-full border border-gray-700 bg-gray-900 px-3 py-1 text-xs font-medium text-gray-400 hover:border-red-500 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500" data-planner-quick="clear">Clear</button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Notes</p>
+                        <textarea id="plannerNotes" rows="5" placeholder="Add context, study materials or links..." class="w-full rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                </div>
+                <div class="space-y-5">
+                    <div>
+                        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Color tag</p>
+                        <div class="grid grid-cols-3 gap-2" id="plannerColorOptions">
+                            <button class="planner-color-option rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-2 text-sm font-medium text-gray-300 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" data-color="none">No color</button>
+                            <button class="planner-color-option rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-sm font-medium text-blue-100 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400" data-color="blue">Blue</button>
+                            <button class="planner-color-option rounded-lg border border-emerald-500/40 bg-emerald-600/20 px-3 py-2 text-sm font-medium text-emerald-100 hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400" data-color="green">Green</button>
+                            <button class="planner-color-option rounded-lg border border-rose-500/40 bg-rose-600/20 px-3 py-2 text-sm font-medium text-rose-100 hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400" data-color="red">Red</button>
+                            <button class="planner-color-option rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-2 text-sm font-medium text-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400" data-color="yellow">Yellow</button>
+                            <button class="planner-color-option rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-sm font-medium text-purple-100 hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400" data-color="purple">Purple</button>
+                            <button class="planner-color-option rounded-lg border border-cyan-500/40 bg-cyan-600/20 px-3 py-2 text-sm font-medium text-cyan-100 hover:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400" data-color="teal">Teal</button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Priority</p>
+                        <div class="flex flex-col gap-2" id="plannerPriorityOptions">
+                            <button class="planner-priority-option flex items-center justify-between rounded-lg border border-rose-500/40 bg-rose-600/20 px-3 py-2 text-sm font-semibold text-rose-100 hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400" data-priority="high">
+                                <span>High</span>
+                                <span class="text-xs uppercase tracking-wide">Focus now</span>
+                            </button>
+                            <button class="planner-priority-option flex items-center justify-between rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-2 text-sm font-semibold text-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400" data-priority="medium">
+                                <span>Medium</span>
+                                <span class="text-xs uppercase tracking-wide">Next up</span>
+                            </button>
+                            <button class="planner-priority-option flex items-center justify-between rounded-lg border border-emerald-500/40 bg-emerald-600/20 px-3 py-2 text-sm font-semibold text-emerald-100 hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400" data-priority="low">
+                                <span>Low</span>
+                                <span class="text-xs uppercase tracking-wide">When ready</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between border-t border-gray-800 bg-gray-900/80 px-6 py-4">
+                <div class="text-xs text-gray-500" id="plannerStatusMessage"></div>
+                <div class="flex gap-2">
+                    <button id="plannerCancelBtn" class="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
+                        Cancel
+                    </button>
+                    <button id="plannerSaveBtn" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        Save changes
+                    </button>
                 </div>
             </div>
         </div>
@@ -222,11 +432,21 @@
         const homeworkInput = document.getElementById('homeworkInput');
         const addHomeworkBtn = document.getElementById('addHomeworkBtn');
         const homeworkList = document.getElementById('homeworkList');
+        const homeworkAdvancedOptions = document.getElementById('homeworkAdvancedOptions');
+        const homeworkSettingsSummary = document.getElementById('homeworkSettingsSummary');
+        const homeworkPlannerBtn = document.getElementById('homeworkPlannerBtn');
+        const homeworkClearSettingsBtn = document.getElementById('homeworkClearSettingsBtn');
+        const homeworkQuickDueButtons = document.querySelectorAll('[data-quick-homework-due]');
 
         // Revision elements
         const revisionInput = document.getElementById('revisionInput');
         const addRevisionBtn = document.getElementById('addRevisionBtn');
         const revisionList = document.getElementById('revisionList');
+        const revisionAdvancedOptions = document.getElementById('revisionAdvancedOptions');
+        const revisionSettingsSummary = document.getElementById('revisionSettingsSummary');
+        const revisionPlannerBtn = document.getElementById('revisionPlannerBtn');
+        const revisionClearSettingsBtn = document.getElementById('revisionClearSettingsBtn');
+        const revisionQuickDueButtons = document.querySelectorAll('[data-quick-revision-due]');
 
         // Friends elements
         const friendInput = document.getElementById('friendInput');
@@ -235,6 +455,30 @@
 
         // Friends' Activity elements
         const friendsActivity = document.getElementById('friendsActivity');
+        const combinedTaskList = document.getElementById('combinedTaskList');
+
+        // Side panel elements
+        const menuToggle = document.getElementById('menuToggle');
+        const sidePanel = document.getElementById('sidePanel');
+        const sidePanelOverlay = document.getElementById('sidePanelOverlay');
+        const sidePanelCloseBtn = document.getElementById('sidePanelCloseBtn');
+        const sidePanelTabButtons = document.querySelectorAll('[data-side-panel-tab]');
+        const sidePanelSections = document.querySelectorAll('[data-side-panel-section]');
+
+        // Music links elements
+        const musicLinkInput = document.getElementById('musicLinkInput');
+        const addMusicLinkBtn = document.getElementById('addMusicLinkBtn');
+        const musicLinksList = document.getElementById('musicLinksList');
+        const musicLinksEmptyState = document.getElementById('musicLinksEmptyState');
+
+        // Tags elements
+        const newTagName = document.getElementById('newTagName');
+        const newTagColor = document.getElementById('newTagColor');
+        const addTagBtn = document.getElementById('addTagBtn');
+        const tagList = document.getElementById('tagList');
+        const tagListEmpty = document.getElementById('tagListEmpty');
+        const homeworkTagsPicker = document.getElementById('homeworkTagsPicker');
+        const revisionTagsPicker = document.getElementById('revisionTagsPicker');
 
         // Timer elements
         const timerDisplay = document.getElementById('timerDisplay');
@@ -250,6 +494,730 @@
         const exerciseList = document.getElementById('exerciseList');
         const saveExercisesBtn = document.getElementById('saveExercisesBtn');
         const closeExerciseModal = document.getElementById('closeExerciseModal');
+
+        // Task planner modal elements
+        const taskPlannerModal = document.getElementById('taskPlannerModal');
+        const plannerTitle = document.getElementById('plannerTitle');
+        const plannerSubtitle = document.getElementById('plannerSubtitle');
+        const plannerDueDate = document.getElementById('plannerDueDate');
+        const plannerNotes = document.getElementById('plannerNotes');
+        const plannerColorOptions = document.querySelectorAll('.planner-color-option');
+        const plannerPriorityOptions = document.querySelectorAll('.planner-priority-option');
+        const plannerQuickButtons = document.querySelectorAll('[data-planner-quick]');
+        const plannerStatusMessage = document.getElementById('plannerStatusMessage');
+        const plannerSaveBtn = document.getElementById('plannerSaveBtn');
+        const plannerCancelBtn = document.getElementById('plannerCancelBtn');
+        const plannerCloseBtn = document.getElementById('plannerCloseBtn');
+
+        // Calendar integration
+        let googleAccessToken = null;
+        const connectCalendarBtn = document.getElementById('connectCalendarBtn');
+        const calendarStatus = document.getElementById('calendarStatus');
+        const upcomingEvents = document.getElementById('upcomingEvents');
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function formatDueDate(value) {
+            if (!value) return null;
+
+            let dateObj = null;
+
+            if (typeof value === 'string') {
+                const parsed = new Date(`${value}T00:00:00`);
+                if (!isNaN(parsed)) {
+                    dateObj = parsed;
+                }
+            } else if (value instanceof Date) {
+                dateObj = value;
+            } else if (value?.toDate) {
+                dateObj = value.toDate();
+            }
+
+            if (!dateObj) return null;
+
+            return dateObj.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        const colorBadgeStyles = {
+            blue: { label: 'Blue Tag', bg: 'rgba(59, 130, 246, 0.15)', border: 'rgba(59, 130, 246, 0.35)', text: '#bfdbfe', dot: '#60a5fa' },
+            green: { label: 'Green Tag', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.35)', text: '#6ee7b7', dot: '#10b981' },
+            red: { label: 'Red Tag', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.35)', text: '#fca5a5', dot: '#ef4444' },
+            yellow: { label: 'Yellow Tag', bg: 'rgba(234, 179, 8, 0.15)', border: 'rgba(234, 179, 8, 0.35)', text: '#fcd34d', dot: '#eab308' },
+            purple: { label: 'Purple Tag', bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.35)', text: '#d8b4fe', dot: '#a855f7' },
+            teal: { label: 'Teal Tag', bg: 'rgba(13, 148, 136, 0.15)', border: 'rgba(13, 148, 136, 0.35)', text: '#5eead4', dot: '#0d9488' },
+            default: { label: 'Tag', bg: 'rgba(75, 85, 99, 0.3)', border: 'rgba(75, 85, 99, 0.45)', text: '#d1d5db', dot: '#9ca3af' }
+        };
+
+        const priorityBadgeStyles = {
+            high: { label: 'High Priority', bg: 'rgba(248, 113, 113, 0.15)', border: 'rgba(248, 113, 113, 0.35)', text: '#fca5a5' },
+            medium: { label: 'Medium Priority', bg: 'rgba(251, 191, 36, 0.15)', border: 'rgba(251, 191, 36, 0.35)', text: '#fcd34d' },
+            low: { label: 'Low Priority', bg: 'rgba(52, 211, 153, 0.15)', border: 'rgba(52, 211, 153, 0.35)', text: '#6ee7b7' }
+        };
+
+        function getColorBadge(color) {
+            if (!color || color === 'none') return '';
+            const style = colorBadgeStyles[color] || colorBadgeStyles.default;
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:${style.bg}; border-color:${style.border}; color:${style.text}">
+                <span class="w-2 h-2 rounded-full" style="background-color:${style.dot};"></span>
+                ${style.label}
+            </span>`;
+        }
+
+        function getPriorityBadge(priority) {
+            if (!priority) return '';
+            const style = priorityBadgeStyles[priority] || priorityBadgeStyles.medium;
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:${style.bg}; border-color:${style.border}; color:${style.text}">
+                ${style.label}
+            </span>`;
+        }
+
+        function setupTabGroup(groupName, optionsContainer) {
+            const buttons = Array.from(document.querySelectorAll(`[data-tab-group="${groupName}"]`));
+            if (buttons.length === 0) return;
+
+            const activeClasses = ['bg-gray-700', 'text-white', 'border-gray-600'];
+            const inactiveClasses = ['bg-gray-800', 'text-gray-300', 'border-transparent'];
+
+            const activate = (button) => {
+                buttons.forEach((btn) => {
+                    btn.classList.remove(...activeClasses, ...inactiveClasses);
+                    btn.classList.add(...inactiveClasses);
+                });
+
+                button.classList.remove(...inactiveClasses);
+                button.classList.add(...activeClasses);
+
+                if (optionsContainer) {
+                    if (button.dataset.tab === 'advanced') {
+                        optionsContainer.classList.remove('hidden');
+                    } else {
+                        optionsContainer.classList.add('hidden');
+                    }
+                }
+            };
+
+            buttons.forEach((button) => {
+                button.addEventListener('click', () => activate(button));
+            });
+
+            const defaultButton = buttons.find(btn => btn.dataset.tab === 'quick') || buttons[0];
+            activate(defaultButton);
+        }
+
+        setupTabGroup('homework', homeworkAdvancedOptions);
+
+        // ============================================
+        // STATE HELPERS
+        // ============================================
+        const colorNames = {
+            none: 'None',
+            blue: 'Blue',
+            green: 'Green',
+            red: 'Red',
+            yellow: 'Yellow',
+            purple: 'Purple',
+            teal: 'Teal'
+        };
+
+        const priorityNames = {
+            high: 'High',
+            medium: 'Medium',
+            low: 'Low'
+        };
+
+        const defaultTaskSettings = () => ({
+            dueDate: null,
+            color: 'none',
+            priority: 'medium',
+            notes: '',
+            tags: []
+        });
+
+        const taskComposerState = {
+            homework: defaultTaskSettings(),
+            revision: defaultTaskSettings()
+        };
+
+        const settingsSummaries = {
+            homework: homeworkSettingsSummary,
+            revision: revisionSettingsSummary
+        };
+
+        function updateTaskComposerSummary(type) {
+            const settings = taskComposerState[type];
+            if (!settings || !settingsSummaries[type]) return;
+
+            const pieces = [];
+            pieces.push(settings.dueDate ? `Due ${formatDueDate(settings.dueDate)}` : 'No due date');
+            pieces.push(`Color: ${colorNames[settings.color] || 'Custom'}`);
+            pieces.push(`Priority: ${priorityNames[settings.priority] || 'Medium'}`);
+
+            if (settings.notes?.trim()) {
+                pieces.push('Notes ready');
+            }
+            if (settings.tags?.length) {
+                pieces.push(`${settings.tags.length} tag${settings.tags.length > 1 ? 's' : ''}`);
+            }
+
+            settingsSummaries[type].innerHTML = pieces.map(piece => `<span>${piece}</span>`).join(' • ');
+        }
+
+        function applyQuickDueDate(type, action) {
+            const settings = taskComposerState[type];
+            if (!settings) return;
+
+            if (action === 'clear') {
+                settings.dueDate = null;
+            } else {
+                const date = new Date();
+                if (action === 'tomorrow') {
+                    date.setDate(date.getDate() + 1);
+                } else if (action === 'week') {
+                    date.setDate(date.getDate() + 7);
+                }
+                settings.dueDate = date.toISOString().slice(0, 10);
+            }
+
+            updateTaskComposerSummary(type);
+        }
+
+        function resetTaskComposerSettings(type) {
+            taskComposerState[type] = defaultTaskSettings();
+            updateTaskComposerSummary(type);
+        }
+
+        updateTaskComposerSummary('homework');
+        updateTaskComposerSummary('revision');
+
+        function bindQuickDueButtons(buttons, type) {
+            buttons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const action = button.dataset.quickHomeworkDue || button.dataset.quickRevisionDue;
+                    if (!action) return;
+                    applyQuickDueDate(type, action);
+                });
+            });
+        }
+
+        bindQuickDueButtons(homeworkQuickDueButtons, 'homework');
+        bindQuickDueButtons(revisionQuickDueButtons, 'revision');
+
+        // ============================================
+        // TAGS MANAGEMENT
+        // ============================================
+        let userTags = [];
+
+        function renderTagChip(tag, withRemove = false) {
+            const style = colorBadgeStyles[tag.color] || colorBadgeStyles.default;
+            return `
+                <span class="inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-semibold border" style="background-color:${style.bg}; border-color:${style.border}; color:${style.text}">
+                    <span class="w-2 h-2 rounded-full" style="background-color:${style.dot};"></span>
+                    ${tag.name}
+                    ${withRemove ? `<button class="ml-1 rounded bg-transparent hover:text-red-300" data-remove-tag="${tag.id}" title="Remove">×</button>` : ''}
+                </span>
+            `;
+        }
+
+        function renderTagList() {
+            if (!tagList) return;
+            tagList.innerHTML = '';
+            if (!userTags.length) {
+                tagListEmpty.classList.remove('hidden');
+                return;
+            }
+            tagListEmpty.classList.add('hidden');
+            userTags.forEach(tag => {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = renderTagChip(tag, true);
+                tagList.appendChild(wrapper.firstElementChild);
+            });
+        }
+
+        function renderTagsPicker(container, type) {
+            if (!container) return;
+            container.innerHTML = '';
+            userTags.forEach(tag => {
+                const style = colorBadgeStyles[tag.color] || colorBadgeStyles.default;
+                const isSelected = (taskComposerState[type].tags || []).some(t => t.id === tag.id);
+                const el = document.createElement('button');
+                el.className = `inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-semibold border ${isSelected ? '' : ''}`;
+                el.setAttribute('style', `background-color:${style.bg}; border-color:${style.border}; color:${style.text}`);
+                el.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color:${style.dot};"></span>${tag.name}`;
+                el.addEventListener('click', () => {
+                    const current = taskComposerState[type].tags || [];
+                    const exists = current.some(t => t.id === tag.id);
+                    taskComposerState[type].tags = exists
+                        ? current.filter(t => t.id !== tag.id)
+                        : [...current, tag]; // store full tag object to embed into task
+                    renderTagsPicker(container, type);
+                    updateTaskComposerSummary(type);
+                });
+                container.appendChild(el);
+            });
+            if (!userTags.length) {
+                container.innerHTML = '<p class="text-xs text-gray-500">No tags yet.</p>';
+            }
+        }
+
+        async function saveUserTags(tags) {
+            if (!currentUser) return;
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, { tags });
+        }
+
+        if (addTagBtn) {
+            addTagBtn.addEventListener('click', async () => {
+                const name = (newTagName?.value || '').trim();
+                const color = newTagColor?.value || 'blue';
+                if (!name || !currentUser) return;
+                const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                userTags.push({ id, name, color });
+                renderTagList();
+                renderTagsPicker(homeworkTagsPicker, 'homework');
+                renderTagsPicker(revisionTagsPicker, 'revision');
+                newTagName.value = '';
+                try {
+                    await saveUserTags(userTags);
+                } catch (e) {
+                    console.error('Failed to save tag:', e);
+                }
+            });
+        }
+
+        if (tagList) {
+            tagList.addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-remove-tag]');
+                if (!btn) return;
+                const id = btn.getAttribute('data-remove-tag');
+                userTags = userTags.filter(t => t.id !== id);
+                renderTagList();
+                renderTagsPicker(homeworkTagsPicker, 'homework');
+                renderTagsPicker(revisionTagsPicker, 'revision');
+                try {
+                    await saveUserTags(userTags);
+                } catch (e2) {
+                    console.error('Failed to remove tag:', e2);
+                }
+            });
+        }
+        if (homeworkPlannerBtn) {
+            homeworkPlannerBtn.addEventListener('click', () => {
+                openTaskPlanner({ mode: 'create', type: 'homework' });
+            });
+        }
+
+        if (revisionPlannerBtn) {
+            revisionPlannerBtn.addEventListener('click', () => {
+                openTaskPlanner({ mode: 'create', type: 'revision' });
+            });
+        }
+
+        if (homeworkClearSettingsBtn) {
+            homeworkClearSettingsBtn.addEventListener('click', () => resetTaskComposerSettings('homework'));
+        }
+
+        if (revisionClearSettingsBtn) {
+            revisionClearSettingsBtn.addEventListener('click', () => resetTaskComposerSettings('revision'));
+        }
+
+        // ============================================
+        // SCROLL LOCK MANAGEMENT
+        // ============================================
+        let overlayStack = 0;
+
+        function lockScroll() {
+            overlayStack += 1;
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function unlockScroll() {
+            overlayStack = Math.max(overlayStack - 1, 0);
+            if (overlayStack === 0) {
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        // ============================================
+        // SIDE PANEL
+        // ============================================
+        const sidePanelActiveClasses = ['border-blue-500/60', 'bg-blue-600/20', 'text-blue-200'];
+        const sidePanelInactiveClasses = ['border-transparent', 'bg-gray-800', 'text-gray-300'];
+        let isSidePanelOpen = false;
+
+        function setSidePanelTab(tabName = 'friends') {
+            sidePanelTabButtons.forEach((button) => {
+                const isActive = button.dataset.sidePanelTab === tabName;
+                button.classList.remove(...sidePanelActiveClasses, ...sidePanelInactiveClasses);
+                button.classList.add(...(isActive ? sidePanelActiveClasses : sidePanelInactiveClasses));
+            });
+
+            sidePanelSections.forEach((section) => {
+                section.classList.toggle('hidden', section.dataset.sidePanelSection !== tabName);
+            });
+        }
+
+        function openSidePanel(defaultTab = 'friends') {
+            if (!sidePanel || !sidePanelOverlay) return;
+            setSidePanelTab(defaultTab);
+            sidePanel.classList.remove('translate-x-full');
+            sidePanelOverlay.classList.remove('hidden');
+            isSidePanelOpen = true;
+            lockScroll();
+        }
+
+        function closeSidePanel() {
+            if (!sidePanel || !sidePanelOverlay || !isSidePanelOpen) return;
+            sidePanel.classList.add('translate-x-full');
+            sidePanelOverlay.classList.add('hidden');
+            isSidePanelOpen = false;
+            unlockScroll();
+        }
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => openSidePanel('friends'));
+        }
+
+        if (sidePanelCloseBtn) {
+            sidePanelCloseBtn.addEventListener('click', closeSidePanel);
+        }
+
+        if (sidePanelOverlay) {
+            sidePanelOverlay.addEventListener('click', closeSidePanel);
+        }
+
+        sidePanelTabButtons.forEach((button) => {
+            button.addEventListener('click', () => setSidePanelTab(button.dataset.sidePanelTab));
+        });
+
+        setSidePanelTab('friends');
+
+        // ============================================
+        // MUSIC LINKS (LOCAL STORAGE)
+        // ============================================
+        const MUSIC_LINKS_STORAGE_KEY = 'studyhub_music_links';
+        let musicLinks = [];
+
+        function loadMusicLinks() {
+            if (!musicLinksList) return;
+            try {
+                const stored = localStorage.getItem(MUSIC_LINKS_STORAGE_KEY);
+                musicLinks = stored ? JSON.parse(stored) : [];
+                if (!Array.isArray(musicLinks)) {
+                    musicLinks = [];
+                }
+            } catch (error) {
+                console.warn('Failed to load music links from storage:', error);
+                musicLinks = [];
+            }
+        }
+
+        function saveMusicLinks() {
+            try {
+                localStorage.setItem(MUSIC_LINKS_STORAGE_KEY, JSON.stringify(musicLinks));
+            } catch (error) {
+                console.warn('Failed to save music links:', error);
+            }
+        }
+
+        function renderMusicLinks() {
+            if (!musicLinksList || !musicLinksEmptyState) return;
+
+            musicLinksList.innerHTML = '';
+            if (musicLinks.length === 0) {
+                musicLinksEmptyState.classList.remove('hidden');
+                return;
+            }
+
+            musicLinksEmptyState.classList.add('hidden');
+
+            musicLinks.forEach((link, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between gap-3 rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-2';
+                li.innerHTML = `
+                    <a href="${link}" target="_blank" rel="noopener" class="truncate text-blue-300 hover:text-blue-200 hover:underline">${link}</a>
+                    <button class="rounded-md border border-gray-600 bg-gray-800 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-300 hover:border-red-500 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500" data-remove-music="${index}">
+                        Remove
+                    </button>
+                `;
+                musicLinksList.appendChild(li);
+            });
+        }
+
+        function addMusicLink(url) {
+            try {
+                const parsed = new URL(url);
+                if (!['http:', 'https:'].includes(parsed.protocol)) {
+                    throw new Error('Invalid protocol');
+                }
+            } catch (error) {
+                if (musicLinksEmptyState) {
+                    musicLinksEmptyState.classList.remove('hidden');
+                    musicLinksEmptyState.textContent = 'Please provide a valid https:// link.';
+                }
+                return false;
+            }
+
+            if (musicLinks.includes(url)) {
+                if (musicLinksEmptyState) {
+                    musicLinksEmptyState.classList.remove('hidden');
+                    musicLinksEmptyState.textContent = 'Link already saved.';
+                }
+                return false;
+            }
+
+            musicLinks.push(url);
+            saveMusicLinks();
+            renderMusicLinks();
+            if (musicLinksEmptyState) {
+                musicLinksEmptyState.textContent = 'No links yet. Add your favorite playlists above.';
+            }
+            return true;
+        }
+
+        if (addMusicLinkBtn && musicLinkInput && musicLinksList) {
+            addMusicLinkBtn.addEventListener('click', () => {
+                const value = musicLinkInput.value.trim();
+                if (!value) {
+                    musicLinkInput.focus();
+                    return;
+                }
+                if (addMusicLink(value)) {
+                    musicLinkInput.value = '';
+                }
+            });
+
+            musicLinkInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addMusicLinkBtn.click();
+                }
+            });
+
+            musicLinksList.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-remove-music]');
+                if (!button) return;
+                const index = parseInt(button.dataset.removeMusic, 10);
+                if (Number.isNaN(index)) return;
+                musicLinks.splice(index, 1);
+                saveMusicLinks();
+                renderMusicLinks();
+                if (musicLinks.length === 0 && musicLinksEmptyState) {
+                    musicLinksEmptyState.classList.remove('hidden');
+                    musicLinksEmptyState.textContent = 'No links yet. Add your favorite playlists above.';
+                }
+            });
+
+            loadMusicLinks();
+            renderMusicLinks();
+        }
+
+        // ============================================
+        // TASK PLANNER MODAL
+        // ============================================
+        let plannerContext = null;
+        let plannerDraft = null;
+
+        function updatePlannerColorSelection(selected) {
+            plannerColorOptions.forEach((button) => {
+                const isActive = button.dataset.color === selected;
+                button.classList.toggle('ring-2', isActive);
+                button.classList.toggle('ring-offset-2', isActive);
+                button.classList.toggle('ring-offset-gray-900', isActive);
+                button.classList.toggle('ring-blue-400', isActive && selected === 'blue');
+                button.classList.toggle('ring-emerald-400', isActive && selected === 'green');
+                button.classList.toggle('ring-rose-400', isActive && selected === 'red');
+                button.classList.toggle('ring-amber-400', isActive && selected === 'yellow');
+                button.classList.toggle('ring-purple-400', isActive && selected === 'purple');
+                button.classList.toggle('ring-cyan-400', isActive && selected === 'teal');
+                if (selected === 'none' && isActive) {
+                    button.classList.add('ring-gray-400');
+                } else {
+                    button.classList.remove('ring-gray-400');
+                }
+            });
+        }
+
+        function updatePlannerPrioritySelection(selected) {
+            plannerPriorityOptions.forEach((button) => {
+                const isActive = button.dataset.priority === selected;
+                button.classList.toggle('ring-2', isActive);
+                button.classList.toggle('ring-offset-2', isActive);
+                button.classList.toggle('ring-offset-gray-900', isActive);
+            });
+        }
+
+        function updatePlannerInputs() {
+            if (!plannerDraft) return;
+            plannerDueDate.value = plannerDraft.dueDate || '';
+            plannerNotes.value = plannerDraft.notes || '';
+            updatePlannerColorSelection(plannerDraft.color || 'none');
+            updatePlannerPrioritySelection(plannerDraft.priority || 'medium');
+            plannerStatusMessage.textContent = '';
+            plannerSaveBtn.disabled = false;
+        }
+
+        function openTaskPlanner(context) {
+            plannerContext = context;
+            const baseSettings = context.mode === 'edit'
+                ? {
+                    dueDate: context.taskData?.dueDate || null,
+                    color: context.taskData?.color || 'none',
+                    priority: context.taskData?.priority || 'medium',
+                    notes: context.taskData?.notes || ''
+                }
+                : { ...taskComposerState[context.type] };
+
+            plannerDraft = {
+                dueDate: baseSettings.dueDate || null,
+                color: baseSettings.color || 'none',
+                priority: baseSettings.priority || 'medium',
+                notes: baseSettings.notes || ''
+            };
+
+            plannerTitle.textContent = context.mode === 'edit' ? 'Edit task details' : 'Task planner';
+            plannerSubtitle.textContent = context.type === 'homework' ? 'Homework task' : 'Revision task';
+
+            updatePlannerInputs();
+
+            if (taskPlannerModal) {
+                taskPlannerModal.classList.remove('hidden');
+                taskPlannerModal.classList.add('flex');
+                lockScroll();
+            }
+        }
+
+        function closeTaskPlanner() {
+            if (!plannerContext) return;
+            plannerContext = null;
+            plannerDraft = null;
+            if (taskPlannerModal) {
+                taskPlannerModal.classList.add('hidden');
+                taskPlannerModal.classList.remove('flex');
+                unlockScroll();
+            }
+        }
+
+        if (plannerDueDate) {
+            plannerDueDate.addEventListener('change', () => {
+                if (!plannerDraft) return;
+                plannerDraft.dueDate = plannerDueDate.value || null;
+            });
+        }
+
+        if (plannerNotes) {
+            plannerNotes.addEventListener('input', () => {
+                if (!plannerDraft) return;
+                plannerDraft.notes = plannerNotes.value;
+            });
+        }
+
+        plannerColorOptions.forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!plannerDraft) return;
+                plannerDraft.color = button.dataset.color;
+                updatePlannerColorSelection(plannerDraft.color);
+            });
+        });
+
+        plannerPriorityOptions.forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!plannerDraft) return;
+                plannerDraft.priority = button.dataset.priority;
+                updatePlannerPrioritySelection(plannerDraft.priority);
+            });
+        });
+
+        plannerQuickButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!plannerDraft) return;
+                const action = button.dataset.plannerQuick;
+                if (action === 'clear') {
+                    plannerDraft.dueDate = null;
+                } else {
+                    const date = new Date();
+                    if (action === 'tomorrow') {
+                        date.setDate(date.getDate() + 1);
+                    } else if (action === 'week') {
+                        date.setDate(date.getDate() + 7);
+                    }
+                    plannerDraft.dueDate = date.toISOString().slice(0, 10);
+                }
+                updatePlannerInputs();
+            });
+        });
+
+        if (plannerCancelBtn) {
+            plannerCancelBtn.addEventListener('click', closeTaskPlanner);
+        }
+
+        if (plannerCloseBtn) {
+            plannerCloseBtn.addEventListener('click', closeTaskPlanner);
+        }
+
+        if (taskPlannerModal) {
+            taskPlannerModal.addEventListener('click', (event) => {
+                if (event.target === taskPlannerModal) {
+                    closeTaskPlanner();
+                }
+            });
+        }
+
+        if (plannerSaveBtn) {
+            plannerSaveBtn.addEventListener('click', async () => {
+                if (!plannerContext || !plannerDraft) return;
+
+                const payload = {
+                    dueDate: plannerDraft.dueDate || null,
+                    color: plannerDraft.color === 'none' ? null : plannerDraft.color,
+                    priority: plannerDraft.priority || 'medium',
+                    notes: plannerDraft.notes?.trim() || ''
+                };
+
+                plannerSaveBtn.disabled = true;
+                plannerStatusMessage.textContent = plannerContext.mode === 'edit' ? 'Saving changes…' : 'Updating defaults…';
+
+                if (plannerContext.mode === 'edit') {
+                    try {
+                        const taskRef = doc(db, 'tasks', plannerContext.taskId);
+                        await updateDoc(taskRef, payload);
+                        plannerStatusMessage.textContent = 'Task updated.';
+                        setTimeout(() => closeTaskPlanner(), 350);
+                    } catch (error) {
+                        console.error('Error updating task:', error);
+                        plannerStatusMessage.textContent = 'Failed to update task. Please try again.';
+                        plannerSaveBtn.disabled = false;
+                    }
+                } else {
+                    const targetState = taskComposerState[plannerContext.type];
+                    if (targetState) {
+                        targetState.dueDate = payload.dueDate;
+                        targetState.color = payload.color || 'none';
+                        targetState.priority = payload.priority;
+                        targetState.notes = payload.notes;
+                        updateTaskComposerSummary(plannerContext.type);
+                    }
+                    plannerStatusMessage.textContent = 'Defaults updated.';
+                    setTimeout(() => closeTaskPlanner(), 250);
+                }
+            });
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (plannerContext) {
+                    closeTaskPlanner();
+                    return;
+                }
+                if (isSidePanelOpen) {
+                    closeSidePanel();
+                }
+            }
+        });
 
         // ============================================
         // AUTHENTICATION
@@ -274,10 +1242,19 @@
                 await initializeUserDocument(user);
 
                 // Load all data
-                loadHomeworkTasks();
-                loadRevisionTasks();
+                loadAllTasks();
                 loadFriends();
                 loadFriendsActivity();
+                // Load tags
+                const userRef = doc(db, 'users', currentUser.uid);
+                onSnapshot(userRef, (snap) => {
+                    if (snap.exists()) {
+                        userTags = snap.data().tags || [];
+                        renderTagList();
+                        renderTagsPicker(homeworkTagsPicker, 'homework');
+                        renderTagsPicker(revisionTagsPicker, 'revision');
+                    }
+                });
             } else {
                 currentUser = null;
                 loginScreen.classList.remove('hidden');
@@ -285,10 +1262,16 @@
             }
         });
 
+        // Extend Google provider with Calendar scopes
+        googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+        googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
+
         // Login with Google
         loginBtn.addEventListener('click', async () => {
             try {
-                await signInWithPopup(auth, googleProvider);
+                const result = await signInWithPopup(auth, googleProvider);
+                const cred = GoogleAuthProvider.credentialFromResult(result);
+                googleAccessToken = cred?.accessToken || null;
             } catch (error) {
                 console.error('Login error:', error);
                 alert('Login failed: ' + error.message);
@@ -303,6 +1286,116 @@
                 console.error('Sign out error:', error);
             }
         });
+
+        // ============================================
+        // GOOGLE CALENDAR INTEGRATION
+        // ============================================
+        async function ensureCalendarAccess() {
+            if (googleAccessToken) return googleAccessToken;
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const cred = GoogleAuthProvider.credentialFromResult(result);
+                googleAccessToken = cred?.accessToken || null;
+                return googleAccessToken;
+            } catch (error) {
+                console.error('Calendar connect failed:', error);
+                throw error;
+            }
+        }
+
+        function setCalendarStatus(text) {
+            if (calendarStatus) calendarStatus.textContent = text || '';
+        }
+
+        function renderEvents(events = []) {
+            if (!upcomingEvents) return;
+            if (!events.length) {
+                upcomingEvents.innerHTML = '<p class="text-sm text-gray-400">No upcoming events.</p>';
+                return;
+            }
+            upcomingEvents.innerHTML = events.map(ev => {
+                const start = ev.start?.dateTime || ev.start?.date || '';
+                const when = start ? formatDueDate(start.slice(0, 10)) : '';
+                return `
+                    <div class="rounded border border-gray-700 bg-gray-800/60 p-2">
+                        <p class="text-white text-sm font-medium">${ev.summary || '(No title)'}</p>
+                        <p class="text-xs text-gray-400">${when}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchUpcomingEvents() {
+            if (!upcomingEvents) return;
+            try {
+                setCalendarStatus('Loading events…');
+                const token = await ensureCalendarAccess();
+                const now = new Date().toISOString();
+                const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(now)}&singleEvents=true&maxResults=10&orderBy=startTime`;
+                const res = await fetch(url, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message || 'Failed to fetch events');
+                renderEvents(data.items || []);
+                setCalendarStatus('');
+            } catch (e) {
+                console.error(e);
+                setCalendarStatus('Could not load events.');
+            }
+        }
+
+        async function addTaskToCalendar(task) {
+            try {
+                const token = await ensureCalendarAccess();
+                // If no due date, open planner to set one first
+                if (!task.dueDate) {
+                    openTaskPlanner({ mode: 'edit', type: task.type || 'homework', taskId: task.id, taskData: task });
+                    setCalendarStatus('Set a due date, then try again.');
+                    return;
+                }
+                // Create all-day event on due date
+                const startDate = typeof task.dueDate === 'string' ? task.dueDate : (task.dueDate?.toDate?.() ? task.dueDate.toDate().toISOString().slice(0,10) : null);
+                if (!startDate) {
+                    setCalendarStatus('Invalid due date for this task.');
+                    return;
+                }
+                const eventPayload = {
+                    summary: task.title,
+                    description: `${task.type === 'homework' ? 'Homework' : 'Revision'}${task.notes ? '\\n\\nNotes: ' + task.notes : ''}`,
+                    start: { date: startDate },
+                    end: { date: startDate }
+                };
+                const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventPayload)
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message || 'Failed to create event');
+                setCalendarStatus('Event added to your calendar.');
+                fetchUpcomingEvents();
+            } catch (e) {
+                console.error('Add to calendar failed:', e);
+                setCalendarStatus('Could not add to calendar.');
+            }
+        }
+
+        if (connectCalendarBtn) {
+            connectCalendarBtn.addEventListener('click', async () => {
+                try {
+                    setCalendarStatus('Connecting…');
+                    await ensureCalendarAccess();
+                    setCalendarStatus('Connected.');
+                    fetchUpcomingEvents();
+                } catch {
+                    setCalendarStatus('Connection failed.');
+                }
+            });
+        }
 
         // ============================================
         // FIRESTORE: USER DOCUMENT INITIALIZATION
@@ -322,8 +1415,132 @@
         }
 
         // ============================================
-        // HOMEWORK TASKS
+        // TASKS (Combined)
         // ============================================
+        function renderCombinedTask(task, container) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'bg-gray-700 rounded p-3';
+            
+            const isCompleted = task.completed || false;
+            const formattedDueDate = formatDueDate(task.dueDate);
+            const metadataPieces = [];
+            const colorBadge = getColorBadge(task.color);
+            const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
+            const tagsBadges = (task.tags || []).map(tag => renderTagChip(tag, false)).join('');
+            const typeBadge = task.type === 'homework'
+                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:rgba(59, 130, 246, 0.15); border-color:rgba(59, 130, 246, 0.35); color:#bfdbfe"><span class="w-2 h-2 rounded-full" style="background-color:#60a5fa"></span>Homework</span>`
+                : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border" style="background-color:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.35); color:#6ee7b7"><span class="w-2 h-2 rounded-full" style="background-color:#10b981"></span>Revision</span>`;
+            metadataPieces.unshift(typeBadge);
+            if (formattedDueDate) {
+                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
+            }
+            if (colorBadge) {
+                metadataPieces.push(colorBadge);
+            }
+            if (priorityBadge) {
+                metadataPieces.push(priorityBadge);
+            }
+            
+            taskDiv.innerHTML = `
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                    <div class="flex flex-1 items-start gap-3">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                               class="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-500 bg-gray-600 text-green-500 focus:ring-green-500"
+                               data-task-id="${task.id}">
+                        <div class="flex-1">
+                            <span class="${isCompleted ? 'line-through text-gray-400' : 'text-white'} font-medium">${task.title}</span>
+                            ${metadataPieces.length || tagsBadges ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}${tagsBadges ? (metadataPieces.length ? '' : '') + tagsBadges : ''}</div>` : ''}
+                            ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/50 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
+                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-task-generic="${task.id}">
+                            Edit
+                        </button>
+                        <button class="rounded-lg border border-emerald-500/40 bg-emerald-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 hover:bg-emerald-600/30 focus:outline-none focus:ring-2 focus:ring-emerald-500" data-add-to-calendar="${task.id}">
+                            Add to Calendar
+                        </button>
+                        ${task.type === 'homework' ? `
+                        <button class="rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-purple-200 hover:bg-purple-600/30 focus:outline-none focus:ring-2 focus:ring-purple-500" data-task-id="${task.id}" data-add-exercise>
+                            ${task.exercises && task.exercises.length ? 'Edit Exercises' : 'Add Exercises'}
+                        </button>
+                        ` : ``}
+                    </div>
+                </div>
+            `;
+
+            const checkbox = taskDiv.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', async (e) => {
+                const taskRef = doc(db, 'tasks', task.id);
+                await updateDoc(taskRef, {
+                    completed: e.target.checked
+                });
+            });
+
+            const editGenericBtn = taskDiv.querySelector('[data-edit-task-generic]');
+            if (editGenericBtn) {
+                editGenericBtn.addEventListener('click', () => {
+                    openTaskPlanner({
+                        mode: 'edit',
+                        type: task.type || 'homework',
+                        taskId: task.id,
+                        taskData: task
+                    });
+                });
+            }
+
+            const addToCalendarBtn = taskDiv.querySelector('[data-add-to-calendar]');
+            if (addToCalendarBtn) {
+                addToCalendarBtn.addEventListener('click', () => addTaskToCalendar(task));
+            }
+
+            const addExerciseBtn = taskDiv.querySelector('[data-add-exercise]');
+            if (addExerciseBtn) {
+                addExerciseBtn.addEventListener('click', () => {
+                    currentTaskId = task.id;
+                    exerciseList.innerHTML = '';
+                    (task.exercises || []).forEach((exercise, idx) => {
+                        addExerciseToModal(exercise.text, idx);
+                    });
+                    exerciseModal.classList.remove('hidden');
+                });
+            }
+
+            container.appendChild(taskDiv);
+        }
+
+        function loadAllTasks() {
+            if (!currentUser) return;
+
+            const q = query(
+                collection(db, 'tasks'),
+                where('userId', '==', currentUser.uid)
+            );
+
+            onSnapshot(q, (snapshot) => {
+                if (!combinedTaskList) return;
+                combinedTaskList.innerHTML = '';
+
+                const items = [];
+                snapshot.forEach((docSnap) => {
+                    items.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // Sort by createdAt desc
+                items.sort((a, b) => {
+                    const aTime = a.createdAt?.toMillis?.() || 0;
+                    const bTime = b.createdAt?.toMillis?.() || 0;
+                    return bTime - aTime;
+                });
+
+                items.forEach((task) => renderCombinedTask(task, combinedTaskList));
+
+                if (items.length === 0) {
+                    combinedTaskList.innerHTML = '<p class="text-sm text-gray-400">No tasks yet.</p>';
+                }
+            });
+        }
+
         function loadHomeworkTasks() {
             if (!currentUser) return;
 
@@ -353,32 +1570,54 @@
             
             const isCompleted = task.completed || false;
             const exercises = task.exercises || [];
-            const allExercisesCompleted = exercises.length > 0 && exercises.every(ex => ex.completed);
+            const formattedDueDate = formatDueDate(task.dueDate);
+            const metadataPieces = [];
+            const colorBadge = getColorBadge(task.color);
+            const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
+            if (formattedDueDate) {
+                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
+            }
+            if (colorBadge) {
+                metadataPieces.push(colorBadge);
+            }
+            if (priorityBadge) {
+                metadataPieces.push(priorityBadge);
+            }
 
             taskDiv.innerHTML = `
-                <div class="flex items-start gap-2">
-                    <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                           class="mt-1 w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
-                           data-task-id="${task.id}">
-                    <div class="flex-1">
-                        <label class="font-medium ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
-                        ${exercises.length > 0 ? `
-                            <div class="mt-2 ml-4 space-y-1">
-                                ${exercises.map((exercise, idx) => `
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" ${exercise.completed ? 'checked' : ''}
-                                               class="w-3 h-3 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
-                                               data-task-id="${task.id}"
-                                               data-exercise-idx="${idx}">
-                                        <label class="text-sm ${exercise.completed ? 'line-through text-gray-400' : 'text-gray-300'}">${exercise.text}</label>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                    <div class="flex flex-1 gap-3">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                               class="mt-1 w-4 h-4 flex-shrink-0 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
+                               data-task-id="${task.id}">
+                        <div class="flex-1">
+                            <label class="font-medium ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
+                            ${metadataPieces.length ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}</div>` : ''}
+                            ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/60 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
+                            ${exercises.length > 0 ? `
+                                <div class="mt-3 space-y-2 rounded-lg border border-gray-700/60 bg-gray-800/40 p-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Exercises</p>
+                                    ${exercises.map((exercise, idx) => `
+                                        <label class="flex items-center gap-2 text-sm ${exercise.completed ? 'line-through text-gray-400' : 'text-gray-300'}">
+                                            <input type="checkbox" ${exercise.completed ? 'checked' : ''}
+                                                   class="h-3 w-3 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                                   data-task-id="${task.id}"
+                                                   data-exercise-idx="${idx}">
+                                            <span>${exercise.text}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
-                    <button class="text-blue-400 hover:text-blue-300 text-sm" data-task-id="${task.id}" data-add-exercise>
-                        ${exercises.length === 0 ? 'Add Exercises' : 'Edit Exercises'}
-                    </button>
+                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
+                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-task="${task.id}">
+                            Edit
+                        </button>
+                        <button class="rounded-lg border border-purple-500/40 bg-purple-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-purple-200 hover:bg-purple-600/30 focus:outline-none focus:ring-2 focus:ring-purple-500" data-task-id="${task.id}" data-add-exercise>
+                            ${exercises.length === 0 ? 'Add Exercises' : 'Edit Exercises'}
+                        </button>
+                    </div>
                 </div>
             `;
 
@@ -416,6 +1655,18 @@
                 exerciseModal.classList.remove('hidden');
             });
 
+            const editTaskBtn = taskDiv.querySelector('[data-edit-task]');
+            if (editTaskBtn) {
+                editTaskBtn.addEventListener('click', () => {
+                    openTaskPlanner({
+                        mode: 'edit',
+                        type: 'homework',
+                        taskId: task.id,
+                        taskData: task
+                    });
+                });
+            }
+
             homeworkList.appendChild(taskDiv);
         }
 
@@ -424,6 +1675,8 @@
             const title = homeworkInput.value.trim();
             if (!title || !currentUser) return;
 
+            const settings = taskComposerState.homework;
+
             try {
                 await addDoc(collection(db, 'tasks'), {
                     title: title,
@@ -431,9 +1684,18 @@
                     completed: false,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp(),
-                    exercises: []
+                    exercises: [],
+                    dueDate: settings.dueDate || null,
+                    color: settings.color === 'none' ? null : settings.color,
+                    priority: settings.priority || 'medium',
+                    notes: settings.notes?.trim() || '',
+                    tags: (settings.tags || []).map(t => ({ id: t.id, name: t.name, color: t.color }))
                 });
                 homeworkInput.value = '';
+                if (taskComposerState.homework.notes) {
+                    taskComposerState.homework.notes = '';
+                    updateTaskComposerSummary('homework');
+                }
             } catch (error) {
                 console.error('Error adding homework:', error);
                 alert('Failed to add homework task');
@@ -474,15 +1736,41 @@
 
         function renderRevisionTask(task) {
             const taskDiv = document.createElement('div');
-            taskDiv.className = 'flex items-center gap-2 bg-gray-700 rounded p-2';
+            taskDiv.className = 'bg-gray-700 rounded p-3';
             
             const isCompleted = task.completed || false;
+            const formattedDueDate = formatDueDate(task.dueDate);
+            const metadataPieces = [];
+            const colorBadge = getColorBadge(task.color);
+            const priorityBadge = task.priority ? getPriorityBadge(task.priority) : '';
+            if (formattedDueDate) {
+                metadataPieces.push(`<span class="text-xs text-gray-400">Due ${formattedDueDate}</span>`);
+            }
+            if (colorBadge) {
+                metadataPieces.push(colorBadge);
+            }
+            if (priorityBadge) {
+                metadataPieces.push(priorityBadge);
+            }
             
             taskDiv.innerHTML = `
-                <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                       class="w-4 h-4 text-green-600 bg-gray-600 border-gray-500 rounded focus:ring-green-500"
-                       data-task-id="${task.id}">
-                <label class="flex-1 ${isCompleted ? 'line-through text-gray-400' : 'text-white'}">${task.title}</label>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                    <label class="flex flex-1 items-start gap-3">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                               class="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-500 bg-gray-600 text-green-500 focus:ring-green-500"
+                               data-task-id="${task.id}">
+                        <div class="flex-1">
+                            <span class="${isCompleted ? 'line-through text-gray-400' : 'text-white'} font-medium">${task.title}</span>
+                            ${metadataPieces.length ? `<div class="mt-2 flex flex-wrap items-center gap-2">${metadataPieces.join('')}</div>` : ''}
+                            ${task.notes ? `<div class="mt-3 rounded-lg border border-gray-600/60 bg-gray-800/50 p-3 text-sm text-gray-200">${task.notes}</div>` : ''}
+                        </div>
+                    </label>
+                    <div class="flex shrink-0 flex-row gap-2 sm:flex-col sm:items-end">
+                        <button class="rounded-lg border border-blue-500/40 bg-blue-600/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-200 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500" data-edit-revision="${task.id}">
+                            Edit
+                        </button>
+                    </div>
+                </div>
             `;
 
             const checkbox = taskDiv.querySelector('input[type="checkbox"]');
@@ -493,6 +1781,18 @@
                 });
             });
 
+            const editRevisionBtn = taskDiv.querySelector('[data-edit-revision]');
+            if (editRevisionBtn) {
+                editRevisionBtn.addEventListener('click', () => {
+                    openTaskPlanner({
+                        mode: 'edit',
+                        type: 'revision',
+                        taskId: task.id,
+                        taskData: task
+                    });
+                });
+            }
+
             revisionList.appendChild(taskDiv);
         }
 
@@ -501,15 +1801,26 @@
             const title = revisionInput.value.trim();
             if (!title || !currentUser) return;
 
+            const settings = taskComposerState.revision;
+
             try {
                 await addDoc(collection(db, 'tasks'), {
                     title: title,
                     type: 'revision',
                     completed: false,
                     userId: currentUser.uid,
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp(),
+                    dueDate: settings.dueDate || null,
+                    color: settings.color === 'none' ? null : settings.color,
+                    priority: settings.priority || 'medium',
+                    notes: settings.notes?.trim() || '',
+                    tags: (settings.tags || []).map(t => ({ id: t.id, name: t.name, color: t.color }))
                 });
                 revisionInput.value = '';
+                if (taskComposerState.revision.notes) {
+                    taskComposerState.revision.notes = '';
+                    updateTaskComposerSummary('revision');
+                }
             } catch (error) {
                 console.error('Error adding revision:', error);
                 alert('Failed to add revision task');
@@ -644,13 +1955,12 @@
                     for (const chunk of friendChunks) {
                         const q = query(
                             collection(db, 'tasks'),
-                            where('userId', 'in', chunk),
-                            where('completed', '==', true)
+                            where('userId', 'in', chunk)
                         );
 
                         onSnapshot(q, async (snapshot) => {
                             if (snapshot.empty && friendsActivity.innerHTML === '') {
-                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No completed tasks from friends yet.</p>';
+                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No tasks from friends yet.</p>';
                                 return;
                             }
 
@@ -684,21 +1994,40 @@
                                 return bTime - aTime;
                             });
 
-                            friendsActivity.innerHTML = activityItems.map(item => `
-                                <div class="bg-gray-700 rounded p-3">
-                                    <p class="text-white">
-                                        <span class="font-semibold text-blue-400">${item.friendName}</span>
-                                        completed
-                                        <span class="font-medium">${item.title}</span>
-                                    </p>
-                                    <p class="text-xs text-gray-400 mt-1">
-                                        ${item.type === 'homework' ? '📚 Homework' : '📖 Revision'}
-                                    </p>
-                                </div>
-                            `).join('');
+                            friendsActivity.innerHTML = activityItems.map(item => {
+                                const statusText = item.completed ? 'completed' : 'is working on';
+                                const formattedDueDate = formatDueDate(item.dueDate);
+                                const metadataPieces = [];
+                                const colorBadge = getColorBadge(item.color);
+                                const priorityBadge = item.priority ? getPriorityBadge(item.priority) : '';
+                                const tagBadges = (item.tags || []).map(tag => renderTagChip(tag, false)).join('');
+                                metadataPieces.push(`<span>${item.type === 'homework' ? '📚 Homework' : '📖 Revision'}</span>`);
+                                if (formattedDueDate) {
+                                    metadataPieces.push(`<span>Due ${formattedDueDate}</span>`);
+                                }
+                                if (colorBadge) {
+                                    metadataPieces.push(colorBadge);
+                                }
+                                if (priorityBadge) {
+                                    metadataPieces.push(priorityBadge);
+                                }
+
+                                return `
+                                    <div class="bg-gray-700 rounded p-3 space-y-1">
+                                        <p class="text-white">
+                                            <span class="font-semibold text-blue-400">${item.friendName}</span>
+                                            ${statusText}
+                                            <span class="font-medium">${item.title}</span>
+                                        </p>
+                                        <div class="flex flex-wrap gap-2 text-xs text-gray-400">
+                                            ${metadataPieces.join('')}${tagBadges}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
 
                             if (friendsActivity.innerHTML === '') {
-                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No completed tasks from friends yet.</p>';
+                                friendsActivity.innerHTML = '<p class="text-sm text-gray-400">No tasks from friends yet.</p>';
                             }
                         });
                     }
