@@ -16,6 +16,35 @@
         #combinedTaskList.hide-completed .completed-task {
             display: none;
         }
+        .sortable-ghost {
+            background-color: #4a5568; /* A gray color for the placeholder */
+            opacity: 0.5;
+        }
+        /* Zen Mode Styles */
+        body.zen-mode .dashboard-widget {
+            display: none;
+        }
+        body.zen-mode .dashboard-widget[data-widget-id="tasks"], 
+        body.zen-mode .dashboard-widget[data-widget-id="revision-session"], 
+        body.zen-mode .dashboard-widget[data-widget-id="music"] {
+            display: block;
+        }
+        body.zen-mode .dashboard-widget[data-widget-id="tasks"] #homeworkWidget > div:first-child {
+            display: none; /* Hide task creation UI */
+        }
+        body.zen-mode #combinedTaskList > div:not(.border-green-500) {
+            display: none; /* Hide non-active tasks */
+        }
+        body.zen-mode #combinedTaskList > .border-green-500 {
+            padding: 1.5rem; /* Larger padding for active task */
+        }
+        body.zen-mode #combinedTaskList > .border-green-500 .font-medium {
+            font-size: 1.25rem; /* Larger title for active task */
+        }
+        body.zen-mode .dashboard-widget[data-widget-id="revision-session"] #revisionTimerDisplay {
+            font-size: 6rem; /* from 5xl to 8xl */
+            line-height: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -43,20 +72,38 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">StudyHub Dashboard</h1>
                 <p class="text-gray-400">Welcome back! Let's get productive.</p>
             </div>
-            <button id="menuToggle" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-2 text-sm font-semibold text-gray-200 shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
-                </svg>
-                Menu
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="zenModeBtn" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-2 text-sm font-semibold text-gray-200 shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span id="zenModeBtnText">Zen Mode</span>
+                </button>
+                <button id="menuToggle" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/80 px-3 py-2 text-sm font-semibold text-gray-200 shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+                    </svg>
+                    Menu
+                </button>
+            </div>
         </header>
 
+        <!-- Daily Goal Progress Bar -->
+        <div id="dailyProgressContainer" class="mb-6">
+            <div class="flex justify-between mb-1 text-sm font-medium text-gray-400">
+                <span>Today's Goal (8 hours)</span>
+                <span id="dailyProgressText">0h 0m / 8h 0m</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                <div id="dailyProgressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+
         <!-- Main Grid Layout -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div id="mainGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <!-- Profile Widget moved to side panel -->
 
             <!-- Combined Tasks Widget (Left, spans 2 columns) -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6 md:col-span-2">
+            <div data-widget-id="tasks" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6 md:col-span-2">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-white">Tasks</h2>
                     <button id="toggleCompletedBtn" class="hidden rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
@@ -125,7 +172,7 @@
             </div>
 
             <!-- Calendar Widget (Right column) -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+            <div data-widget-id="calendar" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4 text-white">Google Calendar</h2>
                 <div class="space-y-3">
                     <button id="connectCalendarBtn" class="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
@@ -139,7 +186,7 @@
             </div>
 
             <!-- Friends' Activity Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+            <div data-widget-id="friends-activity" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-white">Friends' Activity</h2>
                     <button id="toggleFriendsCompletedBtn" class="hidden rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
@@ -152,7 +199,7 @@
             </div>
 
             <!-- Study Timer Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+            <div data-widget-id="study-timer" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4 text-white">Study Timer</h2>
                 <div class="text-center space-y-4">
                     <div id="timerDisplay" class="text-5xl font-mono font-bold text-blue-400">25:00</div>
@@ -171,21 +218,63 @@
                 </div>
             </div>
 
-            <!-- Google Calendar Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-white">Google Calendar</h2>
-                <div class="aspect-video bg-gray-700 rounded overflow-hidden">
-                    <iframe id="calendarFrame" src="" class="w-full h-full border-0"></iframe>
-                    <p class="text-sm text-gray-400 p-4 text-center">Add your public calendar embed URL</p>
-                </div>
-            </div>
-
             <!-- Music Widget -->
-            <div class="bg-gray-800 rounded-lg shadow-md p-6">
+            <div data-widget-id="music" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4 text-white">Music</h2>
                 <div class="aspect-video bg-gray-700 rounded overflow-hidden">
                     <iframe id="musicFrame" src="" class="w-full h-full border-0" allow="autoplay"></iframe>
                     <p class="text-sm text-gray-400 p-4 text-center">Add your Spotify/YouTube playlist embed URL</p>
+                </div>
+            </div>
+
+            <!-- Revision Session Widget -->
+            <div id="revisionSessionWidget" data-widget-id="revision-session" class="dashboard-widget bg-gray-800 rounded-lg shadow-md p-6 transition-all duration-500 ease-in-out">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white">Revision Session</h2>
+                    <button id="toggleRevisionWidgetSizeBtn" class="p-2 rounded-full text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600" title="Expand">
+                        <svg id="expandIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M 4 8 V 4 m 0 0 h 4 M 4 4 l 5 5 Z M 4 16 v 4 m 0 0 h 4 m -4 0 l 5 -5 m 10 -7 v -4 m 0 0 h -4 m 4 0 l -5 5 M 15 20 h 4 M 19 20 V 16 M 19 20 L 14 15" /></svg>
+                        <svg id="collapseIcon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                </div>
+                <div id="revisionSessionCompactView">
+                    <div class="text-center space-y-4">
+                        <div id="revisionTimerDisplay" class="text-5xl font-mono font-bold text-purple-400">00:00:00</div>
+                        <div class="flex gap-2 justify-center">
+                            <button id="revisionStartBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                                Start
+                            </button>
+                            <button id="revisionPauseBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-200 hidden">
+                                Pause
+                            </button>
+                            <button id="revisionStopBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200 hidden">
+                                Stop & Save
+                            </button>
+                        </div>
+                        <p id="revisionTimerStatus" class="text-sm text-gray-400">Ready to start a revision session.</p>
+                    </div>
+                </div>
+                <div id="revisionSessionExpandedView" class="hidden mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Today's Stats -->
+                        <div class="space-y-3 text-center md:text-left">
+                            <h3 class="font-semibold text-white">Today's Progress</h3>
+                            <p class="text-3xl font-bold text-blue-300" id="totalStudyTimeToday">0h 0m</p>
+                            <div id="encouragementMessage" class="text-sm text-gray-400 h-10">Keep going! Every minute counts.</div>
+                        </div>
+                        <!-- Leaderboard -->
+                        <div id="leaderboardContainer">
+                            <div class="border-t border-gray-700 md:border-t-0 md:border-l md:pl-6 md:border-gray-700">
+                                <div class="flex gap-2 mb-3">
+                                    <button class="px-3 py-1 text-sm font-medium rounded transition leaderboard-tab bg-gray-700 text-white border border-gray-600" data-leaderboard-tab="today">Today</s-button>
+                                    <button class="px-3 py-1 text-sm font-medium rounded transition leaderboard-tab bg-gray-800 text-gray-300 border border-transparent hover:bg-gray-700/70" data-leaderboard-tab="weekly">This Week</button>
+                                </div>
+                                <div id="leaderboardToday" class="space-y-2">
+                                    <!-- Leaderboard content will be injected here -->
+                                </div>
+                                <div id="leaderboardWeekly" class="hidden space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -219,6 +308,9 @@
                     </button>
                     <button class="side-panel-tab rounded-lg border border-transparent bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600" data-side-panel-tab="tags">
                         Tags
+                    </button>
+                    <button class="side-panel-tab rounded-lg border border-transparent bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600" data-side-panel-tab="settings">
+                        Settings
                     </button>
                 </div>
             </div>
@@ -301,6 +393,23 @@
                         <h3 class="mb-3 text-sm font-semibold text-white">Your tags</h3>
                         <div id="tagList" class="flex flex-wrap gap-2"></div>
                         <p id="tagListEmpty" class="text-xs text-gray-500">No tags yet. Create one above.</p>
+                    </div>
+                </div>
+                <div data-side-panel-section="settings" class="hidden space-y-4">
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Dashboard Layout</h3>
+                        <p class="mb-3 text-xs text-gray-400">Enable re-order mode to drag and drop widgets into your preferred layout.</p>
+                        <button id="toggleReorderBtn" class="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            Enable Re-order Mode
+                        </button>
+                        <p id="reorderStatus" class="mt-2 text-center text-xs text-green-400 hidden">Re-order mode is active. Drag widgets to move them.</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-800 bg-gray-800/60 p-4 shadow-sm">
+                        <h3 class="mb-3 text-sm font-semibold text-white">Widget Visibility</h3>
+                        <p class="mb-3 text-xs text-gray-400">Toggle which widgets are displayed on your dashboard.</p>
+                        <div id="widgetVisibilityList" class="space-y-2">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -512,6 +621,7 @@
         const musicLinkInput = document.getElementById('musicLinkInput');
         const addMusicLinkBtn = document.getElementById('addMusicLinkBtn');
         const musicLinksList = document.getElementById('musicLinksList');
+        const musicFrame = document.getElementById('musicFrame');
         const musicLinksEmptyState = document.getElementById('musicLinksEmptyState');
 
         // Tags elements
@@ -567,6 +677,40 @@
         const connectCalendarBtn = document.getElementById('connectCalendarBtn');
         const calendarStatus = document.getElementById('calendarStatus');
         const upcomingEvents = document.getElementById('upcomingEvents');
+
+        // Revision Session elements
+        const revisionTimerDisplay = document.getElementById('revisionTimerDisplay');
+        const revisionStartBtn = document.getElementById('revisionStartBtn');
+        const revisionPauseBtn = document.getElementById('revisionPauseBtn');
+        const revisionStopBtn = document.getElementById('revisionStopBtn');
+        const revisionTimerStatus = document.getElementById('revisionTimerStatus');
+        const totalStudyTimeToday = document.getElementById('totalStudyTimeToday');
+        const encouragementMessage = document.getElementById('encouragementMessage');
+        const toggleRevisionWidgetSizeBtn = document.getElementById('toggleRevisionWidgetSizeBtn');
+        const revisionSessionWidget = document.getElementById('revisionSessionWidget');
+        const revisionSessionExpandedView = document.getElementById('revisionSessionExpandedView');
+        const expandIcon = document.getElementById('expandIcon');
+        const leaderboardContainer = document.getElementById('leaderboardContainer');
+        const leaderboardTabs = document.querySelectorAll('.leaderboard-tab');
+        const leaderboardToday = document.getElementById('leaderboardToday');
+        const leaderboardWeekly = document.getElementById('leaderboardWeekly');
+        const dailyProgressContainer = document.getElementById('dailyProgressContainer');
+        const dailyProgressBar = document.getElementById('dailyProgressBar');
+        const dailyProgressText = document.getElementById('dailyProgressText');
+
+        // Layout Re-order elements
+        const mainGrid = document.getElementById('mainGrid');
+        const toggleReorderBtn = document.getElementById('toggleReorderBtn');
+        const reorderStatus = document.getElementById('reorderStatus');
+        const widgetVisibilityList = document.getElementById('widgetVisibilityList');
+
+        // Widget Management
+        const ALL_WIDGETS = Array.from(document.querySelectorAll('.dashboard-widget'));
+
+        // Zen Mode elements
+        const zenModeBtn = document.getElementById('zenModeBtn');
+        const zenModeBtnText = document.getElementById('zenModeBtnText');
+
 
         // ============================================
         // UTILITIES
@@ -833,7 +977,7 @@
                 const style = colorBadgeStyles[tag.color] || colorBadgeStyles.default;
                 const isSelected = (taskComposerState[type].tags || []).some(t => t.id === tag.id);
                 const el = document.createElement('button');
-                el.className = `inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-semibold border ${isSelected ? '' : ''}`;
+                el.className = `inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-semibold border transition-all ${isSelected ? 'ring-2 ring-offset-2 ring-offset-gray-800 ring-blue-400' : ''}`;
                 el.setAttribute('style', `background-color:${style.bg}; border-color:${style.border}; color:${style.text}`);
                 el.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color:${style.dot};"></span>${tag.name}`;
                 el.addEventListener('click', () => {
@@ -1097,14 +1241,45 @@
             musicLinks.forEach((link, index) => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between gap-3 rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-2';
+                
+                // Create a display name for the link
+                let displayName = 'Unknown Link';
+                try {
+                    const url = new URL(link);
+                    if (url.hostname.includes('spotify.com')) {
+                        displayName = 'Spotify Playlist';
+                    } else if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+                        displayName = 'YouTube Video/Playlist';
+                    } else {
+                        displayName = url.hostname;
+                    }
+                } catch (e) { /* keep default name */ }
+
                 li.innerHTML = `
-                    <a href="${link}" target="_blank" rel="noopener" class="truncate text-blue-300 hover:text-blue-200 hover:underline">${link}</a>
-                    <button class="rounded-md border border-gray-600 bg-gray-800 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-300 hover:border-red-500 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500" data-remove-music="${index}">
-                        Remove
-                    </button>
+                    <div class="flex-1 truncate">
+                        <a href="#" data-play-music="${link}" class="font-medium text-blue-300 hover:text-blue-200 hover:underline">${displayName}</a>
+                        <p class="text-xs text-gray-500 truncate">${link}</p>
+                    </div>
+                    <div class="flex-shrink-0 flex gap-1">
+                        <button class="rounded-md border border-gray-600 bg-gray-800 p-1.5 text-xs font-semibold uppercase tracking-wide text-gray-300 hover:border-red-500 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500" data-remove-music="${index}" title="Remove">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
                 `;
                 musicLinksList.appendChild(li);
             });
+        }
+
+        function getEmbedUrl(url) {
+            if (url.includes('spotify.com/playlist/')) {
+                return url.replace('spotify.com/playlist/', 'open.spotify.com/embed/playlist/');
+            }
+            if (url.includes('youtube.com/watch?v=')) {
+                const videoId = new URL(url).searchParams.get('v');
+                return `https://www.youtube.com/embed/${videoId}`;
+            }
+            // Assume it's already an embed link if it doesn't match
+            return url;
         }
 
         function addMusicLink(url) {
@@ -1158,6 +1333,12 @@
             });
 
             musicLinksList.addEventListener('click', (event) => {
+                const playBtn = event.target.closest('[data-play-music]');
+                if (playBtn) {
+                    event.preventDefault();
+                    const url = playBtn.dataset.playMusic;
+                    musicFrame.src = getEmbedUrl(url);
+                }
                 const button = event.target.closest('[data-remove-music]');
                 if (!button) return;
                 const index = parseInt(button.dataset.removeMusic, 10);
@@ -1173,6 +1354,10 @@
 
             loadMusicLinks();
             renderMusicLinks();
+            // Load the first music link by default if it exists
+            if (musicLinks.length > 0 && musicFrame) {
+                musicFrame.src = getEmbedUrl(musicLinks[0]);
+            }
         }
 
         // ============================================
@@ -1404,6 +1589,9 @@
 
                 // Load all data
                 loadAllTasks();
+                loadWidgetVisibility();
+                renderWidgetVisibilityControls();
+                loadWidgetOrder();
                 loadFriends();
                 loadFriendsActivity();
                 // Load tags
@@ -1556,6 +1744,7 @@
                     setCalendarStatus('');
                     showToast('Google Calendar connected successfully!');
                     fetchUpcomingEvents();
+                    connectCalendarBtn.textContent = 'Calendar Connected';
                 } catch {
                     showToast('Failed to connect Google Calendar.', 'error');
                     setCalendarStatus('Connection failed.');
@@ -1575,7 +1764,9 @@
                 await setDoc(userRef, {
                     email: user.email,
                     displayName: user.displayName || 'User',
-                    friends: []
+                    friends: [],
+                    isStudying: false, // Add isStudying field
+                    studySessions: [] // Add studySessions field
                 });
             }
         }
@@ -2246,6 +2437,438 @@
 
         // Initialize timer display
         updateTimerDisplay();
+
+        // ============================================
+        // WIDGET VISIBILITY
+        // ============================================
+        const WIDGET_VISIBILITY_KEY = 'studyhub_widget_visibility';
+
+        function getWidgetName(widgetId) {
+            const names = {
+                'tasks': 'Tasks',
+                'calendar': 'Google Calendar',
+                'friends-activity': "Friends' Activity",
+                'study-timer': 'Study Timer (Pomodoro)',
+                'music': 'Music',
+                'revision-session': 'Revision Session'
+            };
+            return names[widgetId] || widgetId;
+        }
+
+        function saveWidgetVisibility() {
+            const visibilityState = {};
+            ALL_WIDGETS.forEach(widget => {
+                const id = widget.dataset.widgetId;
+                if (id) {
+                    visibilityState[id] = !widget.classList.contains('hidden');
+                }
+            });
+            localStorage.setItem(WIDGET_VISIBILITY_KEY, JSON.stringify(visibilityState));
+        }
+
+        function loadWidgetVisibility() {
+            const savedState = localStorage.getItem(WIDGET_VISIBILITY_KEY);
+            if (!savedState) return;
+
+            try {
+                const visibilityState = JSON.parse(savedState);
+                ALL_WIDGETS.forEach(widget => {
+                    const id = widget.dataset.widgetId;
+                    if (id in visibilityState) {
+                        widget.classList.toggle('hidden', !visibilityState[id]);
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to load widget visibility:", e);
+            }
+        }
+
+        function renderWidgetVisibilityControls() {
+            if (!widgetVisibilityList) return;
+            widgetVisibilityList.innerHTML = '';
+
+            ALL_WIDGETS.forEach(widget => {
+                const id = widget.dataset.widgetId;
+                if (!id) return;
+
+                const isVisible = !widget.classList.contains('hidden');
+                const label = document.createElement('label');
+                label.className = 'flex items-center justify-between cursor-pointer';
+                label.innerHTML = `
+                    <span class="text-sm text-gray-200">${getWidgetName(id)}</span>
+                    <input type="checkbox" class="sr-only peer" ${isVisible ? 'checked' : ''}>
+                    <div class="relative w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                `;
+                label.querySelector('input').addEventListener('change', (e) => {
+                    widget.classList.toggle('hidden', !e.target.checked);
+                    saveWidgetVisibility();
+                });
+                widgetVisibilityList.appendChild(label);
+            });
+        }
+
+        // ============================================
+        // WIDGET RE-ORDERING
+        // ============================================
+        const WIDGET_ORDER_KEY = 'studyhub_widget_order';
+        let sortableInstance = null;
+
+        function saveWidgetOrder() {
+            if (!mainGrid) return;
+            const widgetIds = Array.from(mainGrid.children).map(widget => widget.dataset.widgetId).filter(id => id);
+            localStorage.setItem(WIDGET_ORDER_KEY, JSON.stringify(widgetIds));
+        }
+
+        function loadWidgetOrder() {
+            if (!mainGrid) return;
+            const savedOrder = localStorage.getItem(WIDGET_ORDER_KEY);
+            if (savedOrder) {
+                try {
+                    const widgetIds = JSON.parse(savedOrder);
+                    const widgetMap = new Map();
+                    Array.from(mainGrid.children).forEach(widget => {
+                        const id = widget.dataset.widgetId;
+                        if (id) widgetMap.set(id, widget);
+                    });
+
+                    // Re-append children in the saved order
+                    widgetIds.forEach(id => {
+                        const widget = widgetMap.get(id);
+                        if (widget) mainGrid.appendChild(widget);
+                    });
+                } catch (e) {
+                    console.error("Failed to load widget order:", e);
+                }
+            }
+        }
+
+        function toggleReorderMode() {
+            if (sortableInstance) {
+                sortableInstance.destroy();
+                sortableInstance = null;
+                toggleReorderBtn.textContent = 'Enable Re-order Mode';
+                toggleReorderBtn.classList.replace('bg-red-600', 'bg-indigo-600');
+                reorderStatus.classList.add('hidden');
+                saveWidgetOrder();
+                showToast('Layout saved!', 'success');
+            } else {
+                sortableInstance = new Sortable(mainGrid, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                });
+                toggleReorderBtn.textContent = 'Save Layout';
+                toggleReorderBtn.classList.replace('bg-indigo-600', 'bg-red-600');
+                reorderStatus.classList.remove('hidden');
+            }
+        }
+        toggleReorderBtn.addEventListener('click', toggleReorderMode);
+
+        // ============================================
+        // ZEN MODE
+        // ============================================
+        let isZenMode = false;
+
+        function toggleZenMode() {
+            isZenMode = !isZenMode;
+            document.body.classList.toggle('zen-mode', isZenMode);
+            zenModeBtnText.textContent = isZenMode ? 'Exit Zen' : 'Zen Mode';
+            zenModeBtn.classList.toggle('bg-blue-600', isZenMode);
+            zenModeBtn.classList.toggle('hover:bg-blue-500', isZenMode);
+            zenModeBtn.classList.toggle('bg-gray-800/80', !isZenMode);
+        }
+
+        if (zenModeBtn) {
+            zenModeBtn.addEventListener('click', toggleZenMode);
+        }
+    </script>
+    <script type="module">
+        // REVISION SESSION SCRIPT
+        import { getFirestore, doc, updateDoc, arrayUnion, onSnapshot, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+
+        const db = getFirestore();
+        const auth = getAuth();
+
+        // DOM Elements
+        const revisionTimerDisplay = document.getElementById('revisionTimerDisplay');
+        const revisionStartBtn = document.getElementById('revisionStartBtn');
+        const revisionPauseBtn = document.getElementById('revisionPauseBtn');
+        const revisionStopBtn = document.getElementById('revisionStopBtn');
+        const revisionTimerStatus = document.getElementById('revisionTimerStatus');
+        const totalStudyTimeToday = document.getElementById('totalStudyTimeToday');
+        const encouragementMessage = document.getElementById('encouragementMessage');
+        const toggleRevisionWidgetSizeBtn = document.getElementById('toggleRevisionWidgetSizeBtn');
+        const revisionSessionWidget = document.getElementById('revisionSessionWidget');
+        const leaderboardContainer = document.getElementById('leaderboardContainer');
+        const leaderboardTabs = document.querySelectorAll('.leaderboard-tab');
+        const leaderboardToday = document.getElementById('leaderboardToday');
+        const leaderboardWeekly = document.getElementById('leaderboardWeekly');
+        const dailyProgressBar = document.getElementById('dailyProgressBar');
+        const dailyProgressText = document.getElementById('dailyProgressText');
+
+        const revisionSessionExpandedView = document.getElementById('revisionSessionExpandedView');
+        const expandIcon = document.getElementById('expandIcon');
+        const collapseIcon = document.getElementById('collapseIcon');
+        // State
+        let revisionInterval = null;
+        let sessionSeconds = 0;
+        let isRevisionRunning = false;
+        let currentUser = null;
+        const DAILY_GOAL_SECONDS = 8 * 3600; // 8 hours
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                listenForStudySessions();
+            }
+        });
+
+        function formatSecondsToHMS(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h}h ${m}m`;
+        }
+
+        function formatTime(seconds) {
+            const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function updateRevisionDisplay() {
+            revisionTimerDisplay.textContent = formatTime(sessionSeconds);
+        }
+
+        async function startRevision() {
+            if (isRevisionRunning || !currentUser) return;
+            isRevisionRunning = true;
+            revisionTimerStatus.textContent = 'Session in progress...';
+            revisionStartBtn.classList.add('hidden');
+            revisionPauseBtn.classList.remove('hidden');
+            revisionStopBtn.classList.remove('hidden');
+
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, { isStudying: true });
+
+
+            revisionInterval = setInterval(() => {
+                sessionSeconds++;
+                updateRevisionDisplay();
+            }, 1000);
+        }
+
+        async function pauseRevision() {
+            clearInterval(revisionInterval);
+            isRevisionRunning = false;
+            revisionTimerStatus.textContent = `Paused. Press Start to resume.`;
+            revisionStartBtn.textContent = 'Resume';
+            revisionStartBtn.classList.remove('hidden');
+            revisionPauseBtn.classList.add('hidden');
+
+            if (currentUser) {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, { isStudying: false });
+            }
+        }
+
+        async function stopRevision() {
+            if (!currentUser) return;
+            clearInterval(revisionInterval);
+            isRevisionRunning = false;
+
+            // Save the session duration
+            if (sessionSeconds > 0) {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, {
+                    studySessions: arrayUnion({
+                        duration: sessionSeconds,
+                        timestamp: new Date()
+                    })
+                });
+            }
+
+            // Update studying status
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, { isStudying: false });
+
+            sessionSeconds = 0;
+            updateRevisionDisplay();
+            revisionTimerStatus.textContent = 'Session saved! Ready for another.';
+            revisionStartBtn.textContent = 'Start';
+            revisionStartBtn.classList.remove('hidden');
+            revisionPauseBtn.classList.add('hidden');
+            revisionStopBtn.classList.add('hidden');
+        }
+
+        function getTodayDateString() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function getStartOfWeek() {
+            const now = new Date();
+            const day = now.getDay(); // 0 for Sunday, 6 for Saturday
+            const diff = now.getDate() - day;
+            const startOfWeek = new Date(now.setDate(diff));
+            startOfWeek.setHours(0, 0, 0, 0);
+            return startOfWeek;
+        }
+
+        function listenForStudySessions() {
+            if (!currentUser) return;
+            const userRef = doc(db, 'users', currentUser.uid);
+            onSnapshot(userRef, (snap) => {
+                if (!snap.exists()) return;
+                const userData = snap.data();
+                const sessions = userData.studySessions || [];
+                const todayDate = getTodayDateString();
+                const todaySeconds = sessions
+                    .filter(s => s.timestamp.toDate().toISOString().slice(0, 10) === todayDate)
+                    .reduce((total, s) => total + s.duration, 0);
+
+                totalStudyTimeToday.textContent = formatSecondsToHMS(todaySeconds);
+                updateProgressBar(todaySeconds);
+                // Update leaderboard if it's visible
+                if (!revisionSessionExpandedView.classList.contains('hidden')) {
+                    updateLeaderboard();
+                }
+            });
+        }
+
+        function updateProgressBar(todaySeconds) {
+            const progress = Math.min((todaySeconds / DAILY_GOAL_SECONDS) * 100, 100);
+            dailyProgressBar.style.width = `${progress}%`;
+            dailyProgressText.textContent = `${formatSecondsToHMS(todaySeconds)} / 8h 0m`;
+
+            if (progress < 25) dailyProgressBar.className = 'bg-blue-600 h-2.5 rounded-full transition-all duration-500';
+            else if (progress < 50) dailyProgressBar.className = 'bg-green-500 h-2.5 rounded-full transition-all duration-500';
+            else if (progress < 75) dailyProgressBar.className = 'bg-yellow-500 h-2.5 rounded-full transition-all duration-500';
+            else dailyProgressBar.className = 'bg-red-500 h-2.5 rounded-full transition-all duration-500';
+
+            const remaining = DAILY_GOAL_SECONDS - todaySeconds;
+            if (remaining > 0) {
+                encouragementMessage.textContent = `${formatSecondsToHMS(remaining)} left to reach your daily goal!`;
+            } else {
+                encouragementMessage.textContent = `Goal reached! Amazing work today!`;
+            }
+        }
+
+        async function updateLeaderboard() {
+            if (!currentUser) return;
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (!userDoc.exists()) return;
+
+            const friends = userDoc.data().friends || [];
+            const allUserIds = [currentUser.uid, ...friends];
+            if (allUserIds.length === 0) return;
+
+            const q = query(collection(db, 'users'), where('__name__', 'in', allUserIds));
+            const querySnapshot = await getDocs(q);
+
+            const todayDate = getTodayDateString();
+            const todayLeaderboard = [];
+            const weeklyLeaderboard = [];
+            const startOfWeek = getStartOfWeek();
+            const daysPassedInWeek = new Date().getDay() + 1; // 1 for Sunday, 7 for Saturday
+
+            querySnapshot.forEach(docSnap => {
+                const user = docSnap.data();
+                const sessions = user.studySessions || [];
+                const todaySeconds = (sessions || [])
+                    .filter(s => s.timestamp && s.timestamp.toDate().toISOString().slice(0, 10) === todayDate)
+                    .reduce((total, s) => total + s.duration, 0);
+
+                todayLeaderboard.push({
+                    id: docSnap.id,
+                    name: user.displayName,
+                    time: todaySeconds,
+                    isStudying: user.isStudying || false
+                });
+
+                const totalWeeklySeconds = (sessions || [])
+                    .filter(s => s.timestamp.toDate() >= startOfWeek)
+                    .reduce((total, s) => total + s.duration, 0);
+                
+                const averageWeeklySeconds = daysPassedInWeek > 0 ? totalWeeklySeconds / daysPassedInWeek : 0;
+
+                weeklyLeaderboard.push({
+                    id: docSnap.id,
+                    name: user.displayName,
+                    time: averageWeeklySeconds,
+                    isStudying: user.isStudying || false
+                });
+            });
+
+            todayLeaderboard.sort((a, b) => b.time - a.time);
+            weeklyLeaderboard.sort((a, b) => b.time - a.time);
+            renderLeaderboard(leaderboardToday, todayLeaderboard);
+            renderLeaderboard(leaderboardWeekly, weeklyLeaderboard, ' (avg/day)');
+
+            // Update encouragement message based on leaderboard
+            const myRank = todayLeaderboard.findIndex(u => u.id === currentUser.uid);
+            if (myRank > 0) {
+                const friendAhead = todayLeaderboard[myRank - 1];
+                const timeDiff = friendAhead.time - todayLeaderboard[myRank].time;
+                if (timeDiff > 0) {
+                    encouragementMessage.textContent = `You're only ${formatSecondsToHMS(timeDiff)} away from ${friendAhead.name}!`;
+                }
+            }
+        }
+
+        function renderLeaderboard(container, data, timeSuffix = '') {
+            container.innerHTML = '';
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-400">No study data yet.</p>`;
+                return;
+            }
+            data.forEach((user, index) => {
+                const isMe = user.id === currentUser.uid;
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-2 rounded ${isMe ? 'bg-blue-900/50' : 'bg-gray-700/50'}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold w-6 text-center text-gray-400">${index + 1}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-white">${user.name} ${isMe ? '(You)' : ''}</span>
+                            ${user.isStudying ? '<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>' : ''}
+                        </div>
+                    </div>
+                    <span class="font-semibold text-purple-300">${formatSecondsToHMS(Math.round(user.time))}${timeSuffix}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Event Listeners
+        revisionStartBtn.addEventListener('click', startRevision);
+        revisionPauseBtn.addEventListener('click', pauseRevision);
+        revisionStopBtn.addEventListener('click', stopRevision);
+
+        toggleRevisionWidgetSizeBtn.addEventListener('click', () => {
+            const isExpanded = revisionSessionWidget.classList.toggle('md:col-span-3');
+            revisionSessionExpandedView.classList.toggle('hidden');
+            expandIcon.classList.toggle('hidden');
+            collapseIcon.classList.toggle('hidden');
+            toggleRevisionWidgetSizeBtn.setAttribute('title', isExpanded ? 'Collapse' : 'Expand');
+
+            if (isExpanded) {
+                updateLeaderboard();
+            }
+        });
+
+        leaderboardTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                leaderboardTabs.forEach(t => t.classList.replace('bg-gray-700', 'bg-gray-800'));
+                tab.classList.replace('bg-gray-800', 'bg-gray-700');
+                const tabName = tab.dataset.leaderboardTab;
+                leaderboardToday.classList.toggle('hidden', tabName !== 'today');
+                leaderboardWeekly.classList.toggle('hidden', tabName !== 'weekly');
+                // The leaderboard is now updated automatically, so no need for a placeholder
+                if (tabName === 'weekly') {
+                    updateLeaderboard(); // Re-calculate and render when switching to weekly
+                }
+            });
+        });
     </script>
 </body>
 </html>
